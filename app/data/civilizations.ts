@@ -1,0 +1,27 @@
+export type Civilization = { id:string; name:string; start:number; end:number; region:string; lat:number; lon:number; radius:number; color:string; note:string };
+// Negative years are BCE. Coordinates and radius indicate approximate centers of influence, not borders.
+export const civilizations: Civilization[] = [
+ {id:'jericho',name:'Early Jericho',start:-10000,end:-7000,region:'Levant',lat:31.9,lon:35.4,radius:20,color:'#e9b86b',note:'One of the earliest known permanent settlements.'},
+ {id:'catalhoyuk',name:'Çatalhöyük',start:-7400,end:-6200,region:'Anatolia',lat:37.7,lon:32.8,radius:22,color:'#da916b',note:'Dense Neolithic settlement in central Anatolia.'},
+ {id:'sumer',name:'Sumer',start:-4500,end:-1900,region:'Mesopotamia',lat:31.3,lon:46,radius:27,color:'#e7b45e',note:'City states grew along the Tigris and Euphrates.'},
+ {id:'egypt',name:'Ancient Egypt',start:-3100,end:-30,region:'Nile valley',lat:26.5,lon:30.8,radius:34,color:'#d7ad61',note:'A long lived civilization centered on the Nile.'},
+ {id:'indus',name:'Indus Valley',start:-3300,end:-1300,region:'South Asia',lat:27.5,lon:69,radius:33,color:'#bd9ee8',note:'Urban settlements across the Indus basin.'},
+ {id:'shang',name:'Shang dynasty',start:-1600,end:-1046,region:'East Asia',lat:35,lon:114,radius:30,color:'#e9858b',note:'Early Chinese state in the Yellow River region.'},
+ {id:'olmec',name:'Olmec',start:-1500,end:-400,region:'Mesoamerica',lat:18,lon:-94,radius:26,color:'#83c9a9',note:'Early complex society on the Gulf Coast.'},
+ {id:'persia',name:'Achaemenid Empire',start:-550,end:-330,region:'West Asia',lat:32,lon:53,radius:48,color:'#e1a878',note:'Imperial network stretching across western Asia.'},
+ {id:'rome',name:'Roman Empire',start:-27,end:476,region:'Mediterranean',lat:41.9,lon:12.5,radius:46,color:'#e88770',note:'Mediterranean empire with a far reaching legacy.'},
+ {id:'han',name:'Han dynasty',start:-206,end:220,region:'East Asia',lat:34,lon:108,radius:45,color:'#e9868f',note:'A formative period of imperial China.'},
+ {id:'maya',name:'Maya civilization',start:-2000,end:1697,region:'Mesoamerica',lat:17,lon:-89,radius:28,color:'#81d2a6',note:'Interconnected city states with enduring cultural traditions.'},
+ {id:'gupta',name:'Gupta Empire',start:320,end:550,region:'South Asia',lat:25,lon:78,radius:37,color:'#c7a0e7',note:'Classical era polity across much of northern India.'},
+ {id:'byzantine',name:'Byzantine Empire',start:330,end:1453,region:'Eastern Mediterranean',lat:41,lon:29,radius:34,color:'#ef9b75',note:'Eastern continuation of the Roman Empire.'},
+ {id:'abbasid',name:'Abbasid Caliphate',start:750,end:1258,region:'West Asia',lat:33.3,lon:44.4,radius:45,color:'#efbe75',note:'A major center of scholarship and trade.'},
+ {id:'khmer',name:'Khmer Empire',start:802,end:1431,region:'Southeast Asia',lat:13.4,lon:103.9,radius:31,color:'#91c8d9',note:'Kingdom centered on Angkor.'},
+ {id:'mali',name:'Mali Empire',start:1235,end:1600,region:'West Africa',lat:13,lon:-5,radius:39,color:'#d6bf7f',note:'A powerful West African trading empire.'},
+ {id:'mongol',name:'Mongol Empire',start:1206,end:1368,region:'Eurasia',lat:47,lon:100,radius:62,color:'#a7bfdf',note:'The largest contiguous land empire in history.'},
+ {id:'aztec',name:'Aztec Empire',start:1428,end:1521,region:'Mesoamerica',lat:19.4,lon:-99.1,radius:26,color:'#85cea2',note:'Alliance centered on Tenochtitlan.'},
+ {id:'inca',name:'Inca Empire',start:1438,end:1533,region:'Andes',lat:-13.5,lon:-72,radius:36,color:'#86cbb0',note:'Andean empire linked by an extensive road network.'},
+ {id:'ottoman',name:'Ottoman Empire',start:1299,end:1922,region:'Eastern Mediterranean',lat:41,lon:29,radius:41,color:'#eaa274',note:'Empire spanning southeastern Europe, west Asia and North Africa.'},
+ {id:'qing',name:'Qing dynasty',start:1644,end:1912,region:'East Asia',lat:39.9,lon:116.4,radius:52,color:'#eb9698',note:'The final imperial dynasty of China.'},
+ {id:'british',name:'British Empire',start:1707,end:1997,region:'Global',lat:51.5,lon:-0.1,radius:36,color:'#98b9d9',note:'A global maritime empire; marker shows its center of government.'},
+ {id:'modern',name:'Modern world',start:1945,end:2026,region:'Global',lat:18,lon:0,radius:18,color:'#b4cddd',note:'Independent states and interconnected societies; marker is symbolic.'},
+];
