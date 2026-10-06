@@ -18,9 +18,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const analyticsId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
   return (
     <html lang="en">
       <body className="antialiased">{children}</body>
+      {analyticsId && <script defer src="https://cloud.umami.is/script.js" data-website-id={analyticsId} data-do-not-track="true" />}
     </html>
   );
 }

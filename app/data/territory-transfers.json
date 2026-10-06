@@ -1,0 +1,30 @@
+{
+  "rules": [
+    {
+      "to": "Achaemenid Empire",
+      "start": -550,
+      "end": -500,
+      "origin": [52, 32],
+      "note": "Approximate expansion interval and direction, not annual surveyed borders.",
+      "source": "https://www.metmuseum.org/essays/the-achaemenid-persian-empire-550-330-b-c"
+    },
+    {
+      "from": "Babylonia",
+      "to": "Achaemenid Empire",
+      "start": -540,
+      "end": -539,
+      "origin": [48, 34],
+      "note": "Babylon fell in 539 BCE; the moving front within the conquest interval is illustrative.",
+      "source": "https://www.metmuseum.org/essays/the-achaemenid-persian-empire-550-330-b-c"
+    },
+    {
+      "from": "Egypt",
+      "to": "Achaemenid Empire",
+      "start": -526,
+      "end": -525,
+      "origin": [33, 31],
+      "note": "Cambyses conquered Egypt in 525 BCE. Source outlines and campaign path are approximate.",
+      "source": "https://www.metmuseum.org/essays/the-achaemenid-persian-empire-550-330-b-c"
+    }
+  ]
+}
