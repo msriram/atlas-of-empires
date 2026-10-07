@@ -10,7 +10,7 @@ The basemap is [Natural Earth 1:110m land](https://github.com/nvkelso/natural-ea
 
 The live map uses a precomputed temporal atlas, replacing the old per-year polygon-clipping worker:
 
-1. `scripts/build-atlas.ts` converts dated coordinates into a shared **0.125° longitude/latitude grid**. Smaller source regions take priority where polygons overlap. Holes and longitude wrapping are retained.
+1. `scripts/build-atlas.ts` converts dated coordinates into a shared **0.25° longitude/latitude grid**. Smaller source regions take priority where polygons overlap. Holes and longitude wrapping are retained.
 2. `app/data/empire-timelines.json` gives each empire its own dated regional campaigns, pauses, gains, and losses. `scripts/lib/campaign-chronology.ts` applies these calendars to the relevant geographic portions of the source outlines. There is no shared world growth schedule. Unchanged geography stays fixed. **Missing annual evidence holds the last source border until the next dated map**; a source-map update is not presented as a dated conquest.
 3. `scripts/lib/ownership-field.ts` orders a campaign front through connected target geography from retained territory. Each location records previous/next ownership, arrival time, and a narrow sub-year smoothing band. Disconnected components may seed locally when the route is unknown. Polygons are never scaled into growing or shrinking circles. The geographic selectors and resistance are illustrative, not surveyed campaign fronts or measured terrain.
 4. `public/atlas/manifest.json` indexes content-addressed, compressed interval files. They encode any annual **or fractional-year** sample without storing thousands of redundant annual polygons.
@@ -20,9 +20,9 @@ Animated intermediate shapes are **estimates, not recovered historical annual co
 
 ### Playback and performance
 
-Choose a 1, 10, 100, or 1,000-year step and a speed from ¼× to 32× beside Play. Playback advances `step × speed` years per second using a fractional-year animation clock. With **1y and 32×**, that means 32 years per second while rendering intermediate frames. The sidebar updates at most ten times per second. Scrubbing or selecting a search result pauses playback; a hidden tab does not catch up in a burst.
+Choose a 1, 10, 100, or 1,000-year step and a speed from ¼× to 32× beside Play. Playback advances `step × speed` years per second using a fractional-year animation clock. With **1y and 32×**, that means 32 years per second while rendering intermediate frames. The sidebar updates at most five times per second while the map paints up to sixteen frames per second. Scrubbing or selecting a search result pauses playback; a hidden tab does not catch up in a burst.
 
-The browser runs at most one fetch/decompression worker at a time. Seeking to another interval terminates obsolete work before starting its replacement; decoded buffers transfer to the renderer without copying. It retains the current and previous completed intervals (at most two, about 64 MiB total), and caches at most six compressed files on disk. Forward playback may prefetch its successor; manual scrubbing never triggers speculative loads. Two GPU interval slots are retained separately: reversing between them only binds textures, and loading another interval reuses a slot. It does not download the full atlas. The clock waits at an uncached interval boundary so the date cannot outrun the map. A new deployment refreshes a stale manifest automatically once. Reloads reuse cached geographic data.
+The browser runs at most one fetch/decompression worker at a time. Seeking to another interval terminates obsolete work before starting its replacement; decoded buffers transfer to the renderer without copying. It retains the current and previous completed intervals (at most two, about 16 MiB total), and caches at most six compressed files on disk. Forward playback may prefetch its successor; manual scrubbing never triggers speculative loads. Two GPU interval slots are retained separately: reversing between them only binds textures, and loading another interval reuses a slot. It does not download the full atlas. The clock waits at an uncached interval boundary so the date cannot outrun the map. A new deployment refreshes a stale manifest automatically once. Reloads reuse cached geographic data.
 
 ## Add, change, or remove an empire
 
@@ -73,7 +73,7 @@ The build derives Mongol anchors at 1206 and 1260 from the 1200 and 1279 source 
 
 ## Timeline, events, and journeys
 
-The detailed slider moves in one-year steps. Historical events and their source links are in `app/data/events.ts`. Curated journeys in `app/data/journeys.ts` refer to those event IDs. Search looks across all dated snapshots and custom tracks, jumps the timeline to a matching year, and highlights the region. The region detail panel shows years in which its name appears in source maps; those are coverage dates, not founding and ending dates.
+The narrow selection on the full-history bar moves the focus range. The enlarged bar below it scrubs within that same range in one-year steps; its zoom buttons change the range width. Historical events and their source links are in `app/data/events.ts`. Curated journeys in `app/data/journeys.ts` refer to those event IDs. Search looks across all dated snapshots and custom tracks, jumps the timeline to a matching year, and highlights the region. The region detail panel shows years in which its name appears in source maps; those are coverage dates, not founding and ending dates.
 
 ## Navigation and saved views
 

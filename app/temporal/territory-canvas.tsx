@@ -25,6 +25,15 @@ uniform bool uGlobe;
 uniform bool uDark;
 out vec4 outputColor;
 const float PI = 3.141592653589793;
+uint ownership(ivec2 location) {
+  ivec2 size = textureSize(uOwners, 0);
+  ivec2 cell = ivec2((location.x % size.x + size.x) % size.x, clamp(location.y, 0, size.y - 1));
+  uvec2 owners = texelFetch(uOwners, cell, 0).rg;
+  if (owners.x == owners.y) return owners.x;
+  vec2 timing = vec2(texelFetch(uTiming, cell, 0).rg) / 65535.;
+  float incoming = clamp(.5 + (uPhase - timing.x) / max(timing.y, 1. / 65535.), 0., 1.);
+  return incoming > .5 ? owners.y : owners.x;
+}
 void main() {
   vec2 screen = vec2(gl_FragCoord.x / uResolution.x, 1. - gl_FragCoord.y / uResolution.y);
   vec2 world = uView.xy + screen * uView.zw;
@@ -39,39 +48,19 @@ void main() {
   if (abs(coordinate.y) > 90.) discard;
   ivec2 size = textureSize(uOwners, 0);
   vec2 p = vec2(fract((coordinate.x + 180.) / 360.), (90. - coordinate.y) / 180.) * vec2(size) - .5;
-  ivec2 base = ivec2(floor(p)); vec2 f = fract(p);
-  uint ids[8]; float votes[8];
-  for (int k = 0; k < 4; k++) {
-    int dx = k % 2, dy = k / 2;
-    ivec2 cell = ivec2((base.x + dx + size.x) % size.x, clamp(base.y + dy, 0, size.y - 1));
-    uvec2 owners = texelFetch(uOwners, cell, 0).rg;
-    float incoming = 0.;
-    if (owners.x != owners.y) {
-      vec2 timing = vec2(texelFetch(uTiming, cell, 0).rg) / 65535.;
-      incoming = uPhase <= 0. ? 0. : uPhase >= 1. ? 1. : clamp(.5 + (uPhase - timing.x) / max(timing.y, 1. / 65535.), 0., 1.);
-    }
-    float weight = (dx == 0 ? 1. - f.x : f.x) * (dy == 0 ? 1. - f.y : f.y);
-    ids[k * 2] = owners.x; ids[k * 2 + 1] = owners.y;
-    votes[k * 2] = weight * (1. - incoming); votes[k * 2 + 1] = weight * incoming;
-  }
-  float best = -1., runner = 0.; uint winner = uint(0);
-  if (ids[0] == ids[2] && ids[0] == ids[4] && ids[0] == ids[6] && ids[1] == ids[3] && ids[1] == ids[5] && ids[1] == ids[7]) {
-    float incoming = votes[1] + votes[3] + votes[5] + votes[7];
-    winner = incoming > .5 ? ids[1] : ids[0];
-    best = ids[0] == ids[1] ? 1. : max(incoming, 1. - incoming);
-    runner = ids[0] == ids[1] ? 0. : min(incoming, 1. - incoming);
-  } else for (int k = 0; k < 8; k++) {
-    bool duplicate = false;
-    for (int j = 0; j < 8; j++) if (j < k && ids[j] == ids[k]) duplicate = true;
-    if (duplicate) continue;
-    float score = 0.;
-    for (int j = 0; j < 8; j++) if (ids[j] == ids[k]) score += votes[j];
-    if (score > best) {runner = best; best = score; winner = ids[k];} else runner = max(runner, score);
-  }
+  ivec2 cell = ivec2(floor(p + .5));
+  uint winner = ownership(cell);
   vec4 color = texelFetch(uPalette, ivec2(int(winner) % 64, int(winner) / 64), 0);
-  float difference = best - runner;
-  float edge = 1. - smoothstep(0., max(fwidth(difference) * .85, .002), difference);
-  color.rgb = mix(color.rgb, uDark ? vec3(.93, .97, .93) : vec3(.17, .28, .29), edge * .65);
+  // Sample neighbours only at cell edges. The previous eight-candidate voting
+  // loop ran on every screen pixel and could saturate the embedded renderer.
+  vec2 within = fract(p + .5);
+  vec2 edgeWidth = clamp(fwidth(p) * .65, vec2(.025), vec2(.14));
+  bool edge = false;
+  if (within.x < edgeWidth.x) edge = ownership(cell + ivec2(-1, 0)) != winner;
+  else if (within.x > 1. - edgeWidth.x) edge = ownership(cell + ivec2(1, 0)) != winner;
+  if (within.y < edgeWidth.y) edge = edge || ownership(cell + ivec2(0, -1)) != winner;
+  else if (within.y > 1. - edgeWidth.y) edge = edge || ownership(cell + ivec2(0, 1)) != winner;
+  if (edge) color.rgb = mix(color.rgb, uDark ? vec3(.93, .97, .93) : vec3(.17, .28, .29), .62);
   outputColor = color;
 }`;
 
@@ -109,12 +98,15 @@ export default function TerritoryCanvas(props: Props) {
     });
     gl.uniform1i(uniforms.uOwners, 0); gl.uniform1i(uniforms.uTiming, 1); gl.uniform1i(uniforms.uPalette, 2);
     const atlasTextures = new AtlasTextures(gl);
-    let frame = 0, loaded: AtlasPlan | undefined, paletteKey = '', paletteNames: string[] | undefined, lastDraw = '', dirty = true, measuredFrames = 0, measuredAt = 0, previousFrame = 0;
+    let frame = 0, loaded: AtlasPlan | undefined, paletteKey = '', paletteNames: string[] | undefined, lastDraw = '', dirty = true, measuredFrames = 0, measuredAt = 0, previousFrame = 0, lastPaint = 0;
     const resize = new ResizeObserver(() => {dirty = true;}); resize.observe(element);
     const lost = (e: Event) => {e.preventDefault(); cancelAnimationFrame(frame); current.current.onError('The graphics context was interrupted. Reload to restore the map.');};
     element.addEventListener('webglcontextlost', lost);
     const draw = (now: number) => {
       const p = current.current;
+      // Keep the main thread available for scrubbing while the renderer paints
+      // continuous motion. Fast playback changes the historical year, not FPS.
+      if (p.clock.current.running && now - lastPaint < 1000 / 16) {frame = requestAnimationFrame(draw); return;}
       if (now - previousFrame > 150) {measuredAt = now; measuredFrames = 0;}
       previousFrame = now;
       if (loaded !== p.plan) {
@@ -132,7 +124,10 @@ export default function TerritoryCanvas(props: Props) {
       const year = Math.max(p.plan.start, Math.min(p.plan.end, p.clock.current.year));
       const key = `${year}:${p.view}:${p.rotation}:${p.zoom}:${p.mode}`;
       if (dirty || key !== lastDraw) {
-        const rect = element.getBoundingClientRect(), ratio = Math.min(window.devicePixelRatio || 1, 1.5);
+        const rect = element.getBoundingClientRect();
+        // Full-screen WebGL fragment work and its backing buffers otherwise
+        // grow with devicePixelRatio² and can crash an embedded browser.
+        const ratio = Math.min(window.devicePixelRatio || 1, 1.25, Math.sqrt(600_000 / Math.max(1, rect.width * rect.height)));
         const width = Math.max(1, Math.round(rect.width * ratio)), height = Math.max(1, Math.round(rect.height * ratio));
         if (element.width !== width || element.height !== height) {element.width = width; element.height = height; gl.viewport(0, 0, width, height);}
         gl.uniform2f(uniforms.uResolution, width, height); gl.uniform4fv(uniforms.uView, p.view);
@@ -140,6 +135,7 @@ export default function TerritoryCanvas(props: Props) {
         gl.uniform1f(uniforms.uZoom, p.zoom); gl.uniform1f(uniforms.uPhase, (year - p.plan.start) / (p.plan.end - p.plan.start));
         gl.uniform1i(uniforms.uGlobe, p.mode === 'globe' ? 1 : 0); gl.uniform1i(uniforms.uDark, p.dark ? 1 : 0);
         gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLES, 0, 3);
+        lastPaint = now;
         // Lightweight observable diagnostics; no user data or telemetry.
         if (!measuredAt) measuredAt = now;
         measuredFrames++;

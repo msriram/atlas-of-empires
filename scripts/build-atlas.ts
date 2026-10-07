@@ -11,7 +11,10 @@ import {atlasInputVersion} from './atlas-inputs.mjs';
 import timelineData from '../app/data/empire-timelines.json';
 import {canonicalName, type Chronology} from '../app/temporal/chronology';
 
-const width = 2880, height = 1440, dir = 'public/atlas';
+// A quarter-degree cell is finer than the displayed map at its default zoom.
+// Keeping CPU, worker and GPU grids at one resolution avoids retaining four
+// times more atlas data than playback can draw.
+const width = 1440, height = 720, dir = 'public/atlas';
 const sourceYears = readdirSync('public/historical').filter(f => /^-?\d+\.json$/.test(f)).map(f => Number(f.slice(0, -5))).sort((a, b) => a - b);
 const sources = new Map<number, Boundary[]>(sourceYears.map(y => [y, JSON.parse(readFileSync(`public/historical/${y}.json`, 'utf8')).map((b: Boundary) => ({...b, n: canonicalName(b.n, y)}))]));
 const tracks = keyframes.tracks as {name: string; frames: ({year: number} & Pick<Boundary, 'r'>)[]}[];

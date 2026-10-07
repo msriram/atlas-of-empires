@@ -31,7 +31,9 @@ export function usePlayback(initialYear: number) {
       if (document.hidden) {last = 0; frame = requestAnimationFrame(tick); return;}
       if (last) clock.current.year = advanceYear(clock.current.year, now - last, step, speed, clock.current.ceiling);
       last = now;
-      if (now - publishedAt >= 100 || clock.current.year === clock.current.ceiling) {
+      // The canvas reads the fractional clock directly. React only needs to
+      // refresh labels and interval selection five times per second.
+      if (now - publishedAt >= 200 || clock.current.year === clock.current.ceiling) {
         publishYear(Math.floor(clock.current.year + 1e-7)); publishedAt = now;
       }
       if (clock.current.year >= 2026) {clock.current.running = false; setPlayingState(false); return;}

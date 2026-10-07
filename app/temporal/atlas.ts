@@ -30,18 +30,12 @@ export function incomingWeight(arrival: number, width: number, phase: number) {
   if (phase >= 1) return 1;
   return Math.max(0, Math.min(1, .5 + (phase - arrival / 65535) / Math.max(1 / 65535, width / 65535)));
 }
-/** Same four geographic samples and ownership voting as the GPU shader. */
+/** Same nearest geographic cell and arrival threshold as the GPU shader. */
 export function ownerAt(plan: AtlasPlan, lon: number, lat: number, year: number): number {
   if (lat < -90 || lat > 90) return 0;
-  const x = (((lon + 180) / 360 * plan.width) % plan.width + plan.width) % plan.width - .5;
-  const y = (90 - lat) / 180 * plan.height - .5;
-  const ix = Math.floor(x), iy = Math.floor(y), fx = x - ix, fy = y - iy;
-  const scores = new Map<number, number>();
-  for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 2; dx++) {
-    const i = (Math.max(0, Math.min(plan.height - 1, iy + dy)) * plan.width + (ix + dx + plan.width) % plan.width) * 2;
-    const weight = (dx ? fx : 1 - fx) * (dy ? fy : 1 - fy);
-    const blend = incomingWeight(plan.timing[i], plan.timing[i + 1], phaseAt(plan, year));
-    for (const [id, w] of [[plan.owners[i], weight * (1 - blend)], [plan.owners[i + 1], weight * blend]]) scores.set(id, (scores.get(id) ?? 0) + w);
-  }
-  return [...scores].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 0;
+  const x = Math.round((lon + 180) / 360 * plan.width - .5);
+  const y = Math.round((90 - lat) / 180 * plan.height - .5);
+  const i = (Math.max(0, Math.min(plan.height - 1, y)) * plan.width + ((x % plan.width) + plan.width) % plan.width) * 2;
+  const blend = incomingWeight(plan.timing[i], plan.timing[i + 1], phaseAt(plan, year));
+  return plan.owners[i + (blend > .5 ? 1 : 0)];
 }
