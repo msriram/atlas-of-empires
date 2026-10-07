@@ -1,0 +1,1024 @@
+{
+  "defaultFallback": "hold",
+  "note": "Only dated stages animate by default. Missing annual evidence is held at the last source outline until the next dated map. Set an individual profile fallback to estimated to opt into unrecorded interpolation. Stages select geographic portions of source shapes; timing evidence does not make the estimated annual outlines surveyed fact.",
+  "families": [
+    [
+      "Roman Republic",
+      "Roman Empire"
+    ],
+    [
+      "Eastern Roman Empire",
+      "Byzantine Empire"
+    ]
+  ],
+  "profiles": [
+    {
+      "id": "rome",
+      "names": [
+        "Roman Republic",
+        "Roman Empire"
+      ],
+      "origin": [
+        12.5,
+        41.9
+      ],
+      "fallback": "hold",
+      "source": "https://www.worldhistory.org/timeline/Rome/",
+      "stages": [
+        {
+          "id": "italian-expansion",
+          "action": "gain",
+          "start": -343,
+          "end": -264,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            6,
+            36,
+            19,
+            47
+          ]
+        },
+        {
+          "id": "sicily",
+          "action": "gain",
+          "start": -264,
+          "end": -241,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            11,
+            35,
+            16,
+            39
+          ]
+        },
+        {
+          "id": "sardinia-corsica",
+          "action": "gain",
+          "start": -238,
+          "end": -237,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            8,
+            38,
+            10,
+            44
+          ]
+        },
+        {
+          "id": "iberia",
+          "action": "gain",
+          "start": -218,
+          "end": -133,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            -10,
+            35,
+            4,
+            44
+          ]
+        },
+        {
+          "id": "northern-iberia",
+          "action": "gain",
+          "start": -29,
+          "end": -19,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            -10,
+            42,
+            2,
+            44
+          ]
+        },
+        {
+          "id": "macedonia-and-greece",
+          "action": "gain",
+          "start": -168,
+          "end": -146,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            19,
+            34,
+            29,
+            43
+          ]
+        },
+        {
+          "id": "carthage",
+          "action": "gain",
+          "start": -149,
+          "end": -146,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            7,
+            30,
+            12,
+            38
+          ]
+        },
+        {
+          "id": "asia-minor",
+          "action": "gain",
+          "start": -133,
+          "end": -63,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            26,
+            35,
+            39,
+            43
+          ]
+        },
+        {
+          "id": "syria",
+          "action": "gain",
+          "start": -64,
+          "end": -63,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            34,
+            30,
+            41,
+            38
+          ]
+        },
+        {
+          "id": "gaul",
+          "action": "gain",
+          "start": -58,
+          "end": -51,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "region": [
+            [
+              -5,
+              42
+            ],
+            [
+              3,
+              42
+            ],
+            [
+              8,
+              44
+            ],
+            [
+              9,
+              49
+            ],
+            [
+              6,
+              54
+            ],
+            [
+              -5,
+              52
+            ]
+          ]
+        },
+        {
+          "id": "egypt",
+          "action": "gain",
+          "start": -31,
+          "end": -30,
+          "source": "https://www.worldhistory.org/Roman_Egypt/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            24,
+            20,
+            36,
+            32
+          ]
+        },
+        {
+          "id": "alpine-and-danube-campaigns",
+          "action": "gain",
+          "start": -16,
+          "end": 9,
+          "source": "https://resources.metmuseum.org/resources/metpublications/pdf/Roman_Art_A_Resource_for_Educators.pdf",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            6,
+            44,
+            25,
+            49
+          ]
+        },
+        {
+          "id": "britain",
+          "action": "gain",
+          "start": 43,
+          "end": 83,
+          "source": "https://www.britishmuseum.org/learn/schools/ages-7-11/ancient-rome/timeline-roman-britain",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            -11,
+            49,
+            3,
+            61
+          ]
+        },
+        {
+          "id": "dacia",
+          "action": "gain",
+          "start": 101,
+          "end": 106,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            20,
+            44,
+            30,
+            49
+          ]
+        },
+        {
+          "id": "arabia",
+          "action": "gain",
+          "start": 105,
+          "end": 106,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            34,
+            24,
+            40,
+            33
+          ]
+        },
+        {
+          "id": "mesopotamia",
+          "action": "gain",
+          "start": 114,
+          "end": 117,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            39,
+            30,
+            48,
+            40
+          ]
+        },
+        {
+          "id": "mesopotamia-withdrawal",
+          "action": "loss",
+          "start": 117,
+          "end": 118,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            39,
+            30,
+            48,
+            40
+          ]
+        },
+        {
+          "id": "dacia-withdrawal",
+          "action": "loss",
+          "start": 271,
+          "end": 275,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            20,
+            44,
+            30,
+            49
+          ]
+        }
+      ]
+    },
+    {
+      "id": "western-rome",
+      "names": [
+        "Western Roman Empire"
+      ],
+      "origin": [
+        12.5,
+        41.9
+      ],
+      "fallback": "hold",
+      "source": "https://www.worldhistory.org/timeline/Rome/",
+      "stages": [
+        {
+          "id": "division-of-roman-administration",
+          "action": "gain",
+          "start": 394,
+          "end": 395,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border."
+        },
+        {
+          "id": "britain-withdrawal",
+          "action": "loss",
+          "start": 407,
+          "end": 410,
+          "source": "https://www.britishmuseum.org/learn/schools/ages-7-11/ancient-rome/timeline-roman-britain",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            -11,
+            49,
+            3,
+            61
+          ]
+        },
+        {
+          "id": "gaul-and-iberia-fragmentation",
+          "action": "loss",
+          "start": 406,
+          "end": 418,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            -10,
+            35,
+            9,
+            55
+          ]
+        },
+        {
+          "id": "north-africa-vandals",
+          "action": "loss",
+          "start": 429,
+          "end": 439,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            -6,
+            28,
+            14,
+            38
+          ]
+        },
+        {
+          "id": "italy-odoacer",
+          "action": "loss",
+          "start": 475,
+          "end": 476,
+          "source": "https://www.metmuseum.org/essays/the-roman-empire-27-b-c-393-a-d",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            6,
+            36,
+            19,
+            48
+          ]
+        },
+        {
+          "id": "remaining-western-lands",
+          "action": "loss",
+          "start": 476,
+          "end": 486,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            1,
+            47,
+            4,
+            50
+          ]
+        }
+      ]
+    },
+    {
+      "id": "eastern-rome",
+      "names": [
+        "Eastern Roman Empire",
+        "Byzantine Empire"
+      ],
+      "origin": [
+        29,
+        41
+      ],
+      "fallback": "hold",
+      "source": "https://www.worldhistory.org/timeline/Rome/",
+      "stages": [
+        {
+          "id": "division-of-roman-administration",
+          "action": "gain",
+          "start": 394,
+          "end": 395,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border."
+        },
+        {
+          "id": "justinian-north-africa",
+          "action": "gain",
+          "start": 533,
+          "end": 534,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            -7,
+            27,
+            20,
+            38
+          ]
+        },
+        {
+          "id": "justinian-italy",
+          "action": "gain",
+          "start": 535,
+          "end": 554,
+          "source": "https://www.worldhistory.org/timeline/Rome/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            6,
+            35,
+            19,
+            48
+          ]
+        },
+        {
+          "id": "constantinople",
+          "action": "loss",
+          "start": 1452,
+          "end": 1453,
+          "source": "https://www.bl.uk/stories/blogs/posts/the-last-day-of-constantinople",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            27,
+            40,
+            30,
+            42
+          ]
+        }
+      ]
+    },
+    {
+      "id": "achaemenids",
+      "names": [
+        "Achaemenid Empire"
+      ],
+      "origin": [
+        52,
+        32
+      ],
+      "fallback": "hold",
+      "source": "https://www.metmuseum.org/essays/the-achaemenid-persian-empire-550-330-b-c",
+      "stages": [
+        {
+          "id": "persian-and-median-core",
+          "action": "gain",
+          "start": -550,
+          "end": -549,
+          "source": "https://www.metmuseum.org/essays/the-achaemenid-persian-empire-550-330-b-c",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            45,
+            24,
+            65,
+            43
+          ]
+        },
+        {
+          "id": "lydia",
+          "action": "gain",
+          "start": -548,
+          "end": -546,
+          "source": "https://www.cabinet.ox.ac.uk/nabonidus-chronicle-bm-1",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            25,
+            35,
+            45,
+            43
+          ]
+        },
+        {
+          "id": "babylonia",
+          "action": "gain",
+          "start": -540,
+          "end": -539,
+          "source": "https://www.metmuseum.org/essays/the-achaemenid-persian-empire-550-330-b-c",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            35,
+            28,
+            48,
+            37
+          ]
+        },
+        {
+          "id": "eastern-conquests",
+          "action": "gain",
+          "start": -545,
+          "end": -530,
+          "source": "https://www.metmuseum.org/essays/the-achaemenid-persian-empire-550-330-b-c",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            60,
+            23,
+            76,
+            45
+          ]
+        },
+        {
+          "id": "cambyses-egypt",
+          "action": "gain",
+          "start": -526,
+          "end": -525,
+          "source": "https://www.metmuseum.org/essays/the-achaemenid-persian-empire-550-330-b-c",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            24,
+            20,
+            34,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alexander",
+      "names": [
+        "Empire of Alexander"
+      ],
+      "origin": [
+        22.5,
+        40.5
+      ],
+      "fallback": "hold",
+      "source": "https://web.ics.purdue.edu/~rauhn/Hist303/ALEX_chronology.htm",
+      "stages": [
+        {
+          "id": "macedonian-core",
+          "action": "gain",
+          "start": -336,
+          "end": -335,
+          "source": "https://web.ics.purdue.edu/~rauhn/Hist303/ALEX_chronology.htm",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            19,
+            36,
+            27,
+            43
+          ]
+        },
+        {
+          "id": "western-anatolia",
+          "action": "gain",
+          "start": -334,
+          "end": -333,
+          "source": "https://web.ics.purdue.edu/~rauhn/Hist303/ALEX_chronology.htm",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            26,
+            35,
+            35,
+            42
+          ]
+        },
+        {
+          "id": "issus-levant",
+          "action": "gain",
+          "start": -333,
+          "end": -332,
+          "source": "https://web.ics.purdue.edu/~rauhn/Hist303/ALEX_chronology.htm",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            34,
+            29,
+            40,
+            39
+          ]
+        },
+        {
+          "id": "egypt",
+          "action": "gain",
+          "start": -332,
+          "end": -331,
+          "source": "https://web.ics.purdue.edu/~rauhn/Hist303/ALEX_chronology.htm",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            24,
+            20,
+            34,
+            32
+          ]
+        },
+        {
+          "id": "mesopotamia",
+          "action": "gain",
+          "start": -331,
+          "end": -330,
+          "source": "https://web.ics.purdue.edu/~rauhn/Hist303/ALEX_chronology.htm",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            39,
+            28,
+            49,
+            41
+          ]
+        },
+        {
+          "id": "persian-heartland",
+          "action": "gain",
+          "start": -330,
+          "end": -329,
+          "source": "https://web.ics.purdue.edu/~rauhn/Hist303/ALEX_chronology.htm",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            48,
+            24,
+            60,
+            41
+          ]
+        },
+        {
+          "id": "bactria-sogdiana",
+          "action": "gain",
+          "start": -329,
+          "end": -327,
+          "source": "https://web.ics.purdue.edu/~rauhn/Hist303/ALEX_chronology.htm",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            58,
+            32,
+            73,
+            44
+          ]
+        },
+        {
+          "id": "punjab",
+          "action": "gain",
+          "start": -327,
+          "end": -326,
+          "source": "https://web.ics.purdue.edu/~rauhn/Hist303/ALEX_chronology.htm",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            68,
+            24,
+            78,
+            36
+          ]
+        },
+        {
+          "id": "gedrosian-return",
+          "action": "gain",
+          "start": -326,
+          "end": -325,
+          "source": "https://web.ics.purdue.edu/~rauhn/Hist303/ALEX_chronology.htm",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            58,
+            22,
+            70,
+            32
+          ]
+        },
+        {
+          "id": "successor-wars",
+          "action": "loss",
+          "start": -322,
+          "end": -301,
+          "source": "https://openstax.org/books/world-history-volume-1/pages/6-3-the-hellenistic-era",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border."
+        }
+      ]
+    },
+    {
+      "id": "mongols",
+      "names": [
+        "Mongol Empire"
+      ],
+      "origin": [
+        109,
+        48
+      ],
+      "fallback": "hold",
+      "source": "https://faculty.washington.edu/dwaugh/hist225/225chron/mongchr.html",
+      "stages": [
+        {
+          "id": "steppe-unification",
+          "action": "gain",
+          "start": 1206,
+          "end": 1211,
+          "source": "https://faculty.washington.edu/dwaugh/hist225/225chron/mongchr.html",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            85,
+            44,
+            150,
+            65
+          ]
+        },
+        {
+          "id": "kuchlug-karakhitai",
+          "action": "gain",
+          "start": 1211,
+          "end": 1218,
+          "source": "https://faculty.washington.edu/dwaugh/hist225/225chron/mongchr.html",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            74,
+            30,
+            96,
+            46
+          ]
+        },
+        {
+          "id": "khwarezm",
+          "action": "gain",
+          "start": 1219,
+          "end": 1223,
+          "source": "https://faculty.washington.edu/dwaugh/hist225/225chron/mongchr.html",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            45,
+            29,
+            75,
+            45
+          ]
+        },
+        {
+          "id": "western-xia",
+          "action": "gain",
+          "start": 1226,
+          "end": 1227,
+          "source": "https://faculty.washington.edu/dwaugh/hist225/225chron/mongchr.html",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            96,
+            34,
+            109,
+            44
+          ]
+        },
+        {
+          "id": "jin-north-china",
+          "action": "gain",
+          "start": 1211,
+          "end": 1215,
+          "source": "https://faculty.washington.edu/dwaugh/hist225/225chron/mongchr.html",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            109,
+            37,
+            125,
+            44
+          ]
+        },
+        {
+          "id": "jin-completion",
+          "action": "gain",
+          "start": 1231,
+          "end": 1234,
+          "source": "https://faculty.washington.edu/dwaugh/hist225/225chron/mongchr.html",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            105,
+            30,
+            125,
+            38
+          ]
+        },
+        {
+          "id": "rus-and-western-steppe",
+          "action": "gain",
+          "start": 1236,
+          "end": 1242,
+          "source": "https://faculty.washington.edu/dwaugh/hist225/225chron/mongchr.html",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            25,
+            44,
+            75,
+            63
+          ]
+        },
+        {
+          "id": "anatolia",
+          "action": "gain",
+          "start": 1241,
+          "end": 1243,
+          "source": "https://faculty.washington.edu/dwaugh/hist225/225chron/mongchr.html",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            28,
+            35,
+            45,
+            44
+          ]
+        },
+        {
+          "id": "tibet",
+          "action": "gain",
+          "start": 1240,
+          "end": 1247,
+          "source": "https://faculty.washington.edu/dwaugh/hist225/225chron/mongchr.html",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            85,
+            25,
+            105,
+            35
+          ]
+        },
+        {
+          "id": "hulegu-iran",
+          "action": "gain",
+          "start": 1253,
+          "end": 1256,
+          "source": "https://www.metmuseum.org/essays/the-legacy-of-genghis-khan",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            44,
+            24,
+            64,
+            40
+          ]
+        },
+        {
+          "id": "baghdad",
+          "action": "gain",
+          "start": 1256,
+          "end": 1258,
+          "source": "https://www.metmuseum.org/essays/the-legacy-of-genghis-khan",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            35,
+            28,
+            46,
+            40
+          ]
+        },
+        {
+          "id": "successor-independence",
+          "action": "loss",
+          "start": 1260,
+          "end": 1264,
+          "source": "https://www.worldhistory.org/Mongol_Empire/",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border."
+        }
+      ]
+    },
+    {
+      "id": "yuan",
+      "names": [
+        "Great Khanate"
+      ],
+      "origin": [
+        116,
+        40
+      ],
+      "fallback": "hold",
+      "source": "https://faculty.washington.edu/dwaugh/hist225/225chron/mongchr.html",
+      "stages": [
+        {
+          "id": "song-conquest",
+          "action": "gain",
+          "start": 1268,
+          "end": 1279,
+          "source": "https://faculty.washington.edu/dwaugh/hist225/225chron/mongchr.html",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            98,
+            18,
+            123,
+            33
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ottomans",
+      "names": [
+        "Ottoman Empire"
+      ],
+      "origin": [
+        29,
+        40
+      ],
+      "fallback": "hold",
+      "source": "https://www.metmuseum.org/exhibitions/listings/2013/interwoven-globe",
+      "stages": [
+        {
+          "id": "balkan-expansion",
+          "action": "gain",
+          "start": 1354,
+          "end": 1389,
+          "source": "https://openstax.org/books/world-history-volume-2/pages/4-2-the-ottoman-empire",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            19,
+            36,
+            30,
+            45
+          ]
+        },
+        {
+          "id": "constantinople",
+          "action": "gain",
+          "start": 1452,
+          "end": 1453,
+          "source": "https://www.metmuseum.org/exhibitions/listings/2013/interwoven-globe",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            27,
+            40,
+            30,
+            42
+          ]
+        },
+        {
+          "id": "syria-and-egypt",
+          "action": "gain",
+          "start": 1516,
+          "end": 1517,
+          "source": "https://www.metmuseum.org/exhibitions/listings/2013/interwoven-globe",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            24,
+            19,
+            44,
+            38
+          ]
+        },
+        {
+          "id": "suleyman-hungary",
+          "action": "gain",
+          "start": 1521,
+          "end": 1541,
+          "source": "https://www.metmuseum.org/TOAH/HD/suly/hd_suly.htm",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            14,
+            42,
+            27,
+            49
+          ]
+        },
+        {
+          "id": "suleyman-iraq",
+          "action": "gain",
+          "start": 1533,
+          "end": 1535,
+          "source": "https://www.metmuseum.org/TOAH/HD/suly/hd_suly.htm",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            38,
+            28,
+            49,
+            40
+          ]
+        },
+        {
+          "id": "north-african-expansion",
+          "action": "gain",
+          "start": 1520,
+          "end": 1566,
+          "source": "https://www.metmuseum.org/TOAH/HD/suly/hd_suly.htm",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border.",
+          "bounds": [
+            -1,
+            29,
+            24,
+            38
+          ]
+        }
+      ]
+    },
+    {
+      "id": "umayyads",
+      "names": [
+        "Umayyad Caliphate"
+      ],
+      "origin": [
+        36,
+        33
+      ],
+      "fallback": "hold",
+      "source": "https://www.metmuseum.org/learn/educators/curriculum-resources/art-of-the-islamic-world/~/media/Files/Learn/For%20Educators/Publications%20for%20Educators/Islamic%20Teacher%20Resource/Introduction.pdf",
+      "stages": [
+        {
+          "id": "umayyad-accession",
+          "action": "gain",
+          "start": 660,
+          "end": 661,
+          "source": "https://www.metmuseum.org/learn/educators/curriculum-resources/art-of-the-islamic-world/~/media/Files/Learn/For%20Educators/Publications%20for%20Educators/Islamic%20Teacher%20Resource/Introduction.pdf",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border."
+        },
+        {
+          "id": "abbasid-revolution",
+          "action": "loss",
+          "start": 747,
+          "end": 750,
+          "source": "https://www.metmuseum.org/learn/educators/curriculum-resources/art-of-the-islamic-world/~/media/Files/Learn/For%20Educators/Publications%20for%20Educators/Islamic%20Teacher%20Resource/Introduction.pdf",
+          "geometry": "Approximate geographic selection clipped to the dated source outlines; not a surveyed campaign border."
+        }
+      ]
+    }
+  ]
+}

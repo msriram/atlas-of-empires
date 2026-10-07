@@ -56,9 +56,12 @@ export default defineConfig(async ({ command }) => {
       ...(managedLinux
         ? { host: "0.0.0.0", allowedHosts: ["terminal.local"] }
         : {}),
-      ...(isCodexSeatbeltSandbox
-        ? { watch: { useFsEvents: false, usePolling: true } }
-        : {}),
+      watch: {
+        ...(isCodexSeatbeltSandbox ? {useFsEvents: false, usePolling: true} : {}),
+        // Atlas regeneration writes many binary chunks. They are fetched data,
+        // not code: refreshing all RSC/CSS modules for each chunk is expensive.
+        ignored: ['**/public/atlas/**'],
+      },
     },
     plugins: [
       vinext(),

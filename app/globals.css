@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "../vendor/shadcn-tailwind-4.13.0.css";
+@source not "../public/atlas";
+@source not "../public/historical";
+@source not "../scripts";
+@source not "../tests";
 :root{--background:#091520;--foreground:#eaf0eb;--primary:#c9a56b;--muted:#24333c;--border:#34505c}
 *{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif}button,input{font:inherit}button{cursor:pointer}
 .atlas{--ocean:#071b28;--land:#23424d;--land-stroke:#54717a;--text:#ecf0ec;--sub:#9aafb7;--panel:rgba(9,25,34,.88);--edge:rgba(162,198,203,.19);--gold:#d7b47a;position:relative;width:100vw;height:100dvh;min-height:650px;overflow:hidden;color:var(--text);background:var(--ocean);transition:background .3s,color .3s}
@@ -40,3 +44,7 @@
 .day .real-map .boundary{fill-opacity:.82}.day .real-map .boundary.selected-boundary{fill-opacity:1}
 .map-loading{position:absolute;top:110px;left:50%;transform:translateX(-50%);z-index:12;background:var(--panel,#152824);color:var(--text,#edf4ee);padding:10px 18px;border:1px solid #8ba99a55;border-radius:12px;font-size:12px;box-shadow:0 4px 20px #0002;pointer-events:none}
 .panel-foot a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.territory-layer{pointer-events:none;overflow:hidden}.territory-canvas{display:block;width:100%;height:100%;pointer-events:none}
+.speed-control{display:flex;align-items:center;height:37px;border:1px solid var(--edge);border-radius:6px;background:var(--panel);overflow:hidden}.speed-control button{display:grid;place-items:center;width:25px;height:35px;border:0;background:transparent;color:var(--sub)}.speed-control button:hover{color:var(--gold);background:var(--edge)}.speed-control button:disabled{opacity:.3;cursor:default}.speed-control select{color:var(--gold);background:transparent;border:0;font-size:12px;width:56px;padding:0 3px;height:35px;cursor:pointer}.speed-control option{color:var(--text);background:var(--ocean)}.playback-rate{font-size:10px;color:var(--sub);min-width:72px;margin-right:4px;white-space:nowrap}
+@media(max-width:1100px){.timeline-heading .eyebrow{display:none}.playback-rate{display:none}.timeline-controls{gap:5px}.step-picker{margin-left:5px}}
+@media(max-width:600px){.speed-control button{width:20px}.speed-control select{width:51px}.timeline-controls{gap:3px}.step-picker{margin-left:auto}.step-picker button{font-size:11px;padding:5px 3px}.views-button{display:none}}

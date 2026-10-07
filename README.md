@@ -4,9 +4,25 @@ An interactive, approximate world timeline from 10,000 BCE to today. Run locally
 
 ## Historical boundaries
 
-The basemap is [Natural Earth 1:110m land](https://github.com/nvkelso/natural-earth-vector), public domain. Dated political and cultural polygons in `public/historical/` are simplified derivatives of [André Ourednik's historical-basemaps](https://github.com/aourednik/historical-basemaps), licensed GPL-3.0; see `public/historical/LICENSE`. The app uses the source polygons directly at their mapped snapshot years, subject to the limitations of that dataset. In particular, ancient and poorly documented boundaries are uncertain. The newest source snapshot is 2010; later years use that shape.
+The basemap is [Natural Earth 1:110m land](https://github.com/nvkelso/natural-earth-vector), public domain. Dated political and cultural polygons in `public/historical/` are simplified derivatives of [André Ourednik's historical-basemaps](https://github.com/aourednik/historical-basemaps), GPL-3.0; see `public/historical/LICENSE`. These maps have uncertain borders, inconsistent coverage, and some historical naming errors. The newest source snapshot is 2010; later years reuse it.
 
-`app/territory-transfers.ts` partitions overlapping source polygons into shared pieces of land and moves a single ownership edge between neighboring regions. This keeps land occupied during takeovers and prevents independently grown polygons from overlapping. `app/territory-model.ts` applies dated transfer rules and custom keyframes. A region that appears in only one source snapshot still has uncertain coverage; its estimated edge is illustrative. The same longitude/latitude polygons render in both map and globe views. Very dense snapshots use a bounded local calculation; preexisting source overlaps may remain there. Calculations run in a same-origin Web Worker so the controls stay responsive.
+### Continuous geographic ownership
+
+The live map uses a precomputed temporal atlas, replacing the old per-year polygon-clipping worker:
+
+1. `scripts/build-atlas.ts` converts dated coordinates into a shared **0.125° longitude/latitude grid**. Smaller source regions take priority where polygons overlap. Holes and longitude wrapping are retained.
+2. `app/data/empire-timelines.json` gives each empire its own dated regional campaigns, pauses, gains, and losses. `scripts/lib/campaign-chronology.ts` applies these calendars to the relevant geographic portions of the source outlines. There is no shared world growth schedule. Unchanged geography stays fixed. **Missing annual evidence holds the last source border until the next dated map**; a source-map update is not presented as a dated conquest.
+3. `scripts/lib/ownership-field.ts` orders a campaign front through connected target geography from retained territory. Each location records previous/next ownership, arrival time, and a narrow sub-year smoothing band. Disconnected components may seed locally when the route is unknown. Polygons are never scaled into growing or shrinking circles. The geographic selectors and resistance are illustrative, not surveyed campaign fronts or measured terrain.
+4. `public/atlas/manifest.json` indexes content-addressed, compressed interval files. They encode any annual **or fractional-year** sample without storing thousands of redundant annual polygons.
+5. `app/temporal/territory-canvas.tsx` evaluates the same field on the GPU in flat or orthographic globe coordinates. Land has one displayed owner. Clicking and rendering use the same geographic sampling. Shared endpoints are identical across intervals.
+
+Animated intermediate shapes are **estimates, not recovered historical annual coordinates**. The grid also limits very small states and extreme zoom detail. Add dated coordinate keyframes to improve the historical result; interpolation cannot supply missing evidence. The browser needs WebGL 2 for animated boundaries.
+
+### Playback and performance
+
+Choose a 1, 10, 100, or 1,000-year step and a speed from ¼× to 32× beside Play. Playback advances `step × speed` years per second using a fractional-year animation clock. With **1y and 32×**, that means 32 years per second while rendering intermediate frames. The sidebar updates at most ten times per second. Scrubbing or selecting a search result pauses playback; a hidden tab does not catch up in a burst.
+
+The browser loads the current interval and prefetches its successor, retains at most two decoded intervals, and caches at most six compressed files on disk. It does not download the full atlas. The clock waits at an uncached interval boundary so the date cannot outrun the map. A new deployment refreshes a stale manifest automatically once. Reloads reuse cached geographic data.
 
 ## Add, change, or remove an empire
 
@@ -27,9 +43,33 @@ Edit `app/data/territory-keyframes.json`. Add a track with two or more dated lon
 }
 ```
 
-Negative years are BCE. `r` is an array of polygon rings; each point is `[longitude, latitude]` in degrees. A track overrides a source region with the same name for the track's date range; it can also add an entirely new region. To remove a source region, add its exact name to `hidden`. To remove a custom region, delete its track. Yearly shapes between your frames are interpolated automatically. The file is imported at build time, so save it and let the local dev server rebuild.
+Negative years are BCE. `r` is an array of polygon rings; each point is `[longitude, latitude]` in degrees. A track overrides a source region with the same name for the track's date range; it can also add an entirely new region. To remove a source region, add its exact name to `hidden`. To remove a custom region, delete its track. Authored coordinate tracks explicitly opt into estimated interpolation between their frames. Identical frames remain static. Run `npm run build:atlas` after changing geographic data, then reload the page. `npm run dev` and `npm run build` also check for changed inputs and regenerate only when needed. Source edits do not trigger a full atlas rebuild on every browser reload. Commit the updated atlas manifest and generated interval files with the source data.
 
-`app/data/territory-transfers.json` contains dated transfer controls and source links. `app/data/territory-rules.ts` contains the approximate Mongol campaign reach controls. `public/historical/1279.json` supplies the successor polygons that constrain its outer extent. Alexander's eastward campaign controls are in `app/data/events.ts`. Add a similarly dated rule for a campaign when you have better coordinates; the general source interpolation continues to work for every other region.
+### Independent campaign data
+
+`app/data/empire-timelines.json` is the live calendar. Each profile has names, an approximate origin, a fallback policy, sources, and regional stages. For example:
+
+```json
+{
+  "id": "example",
+  "names": ["Example Kingdom"],
+  "origin": [12, 41],
+  "fallback": "hold",
+  "source": "https://example.org/historical-source",
+  "stages": [
+    {"id": "northern-campaign", "action": "gain", "start": 120, "end": 125,
+     "bounds": [10, 40, 18, 47], "source": "https://example.org/campaign-source"},
+    {"id": "western-loss", "action": "loss", "start": 170, "end": 174,
+     "region": [[10,40],[12,40],[12,44],[10,44]], "source": "https://example.org/loss-source"}
+  ]
+}
+```
+
+`bounds` means `[west, south, east, north]`; `region` is a geographic selection polygon. Both are clipped to the dated source shapes. They select where a campaign applies, rather than defining a circle around a capital. Later, more specific stages take priority where selectors overlap. A stage whose dates partly overlap a source interval is constrained by that interval's endpoints. The current source geometry cannot reconstruct a conquest and reversal wholly missing from every source map; add coordinate keyframes for that case.
+
+The default fallback is `hold`. Use `estimated` on an **individual profile** only when an explicitly approximate transition is wanted despite missing annual evidence. There is no random growth or calendar-wide expansion curve. Existing profiles cover Rome's provinces and fragmentation, Achaemenid conquests, Alexander's campaigns/succession, Mongol campaigns/fragmentation, Yuan conquest of Song territory, Ottoman campaigns, and the Umayyad transition. Their source links support chronology; their intermediate outlines remain approximate.
+
+The build derives Mongol anchors at 1206 and 1260 from the 1200 and 1279 source outlines. Later source maps supply successor regions. `app/data/territory-transfers.json` and the old polygon worker are retained as reference for the previous engine; the live chronology takes precedence. Keyframe dates are map evidence, not necessarily founding or ending dates.
 
 ## Timeline, events, and journeys
 
