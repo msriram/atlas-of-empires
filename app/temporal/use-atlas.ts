@@ -1,73 +1,80 @@
 'use client';
 import {useEffect, useState, type RefObject} from 'react';
-import {MAGIC, decodePlan, type AtlasManifest, type AtlasInterval, type AtlasPlan} from './atlas';
+import {decodePlan, type AtlasManifest, type AtlasInterval, type AtlasPlan} from './atlas';
+import {AtlasLoader, cancelledLoad, type LoadJob} from './atlas-loader';
 import type {PlaybackClock} from './use-playback';
 
-let manifestPromise: Promise<AtlasManifest> | undefined;
-const plans = new Map<string, Promise<AtlasPlan>>();
-const CACHE = 'atlas-geography-v2';
-function manifest() {
-  if (!manifestPromise) manifestPromise = fetch('/atlas/manifest.json', {cache: 'no-cache'}).then(r => {
-    if (!r.ok) throw new Error('Unable to load historical data'); return r.json() as Promise<AtlasManifest>;
-  }).catch(error => {manifestPromise = undefined; throw error;});
-  return manifestPromise;
-}
-async function load(interval: AtlasInterval) {
-  const cached = plans.get(interval.file);
-  if (cached) {plans.delete(interval.file); plans.set(interval.file, cached); return cached;}
-  const promise = (async () => {
-    const url = `/atlas/${interval.file}`;
-    // Content-addressed chunks are safe across deployments. Persist compressed
-    // data only; the decompressed memory cache holds at most two intervals.
-    let disk: Cache | undefined;
-    try {disk = await caches.open(CACHE);} catch {/* Private browsing still works. */}
-    let response = await disk?.match(url);
-    if (!response) {
-      response = await fetch(url);
-      if (!response.ok) throw new Error('Unable to load this historical interval');
-      if (disk) {
-        const copy = response.clone();
-        void disk.put(url, copy).then(async () => {const keys = await disk!.keys(); for (const key of keys.slice(0, -6)) await disk!.delete(key);}).catch(() => {});
-      }
-    }
-    const bytes = await response.arrayBuffer();
-    // Some hosts apply Content-Encoding themselves; accept either representation.
-    const buffer = new DataView(bytes).getUint32(0, true) === MAGIC ? bytes : await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
-    return decodePlan(buffer, interval);
-  })();
-  plans.set(interval.file, promise);
-  while (plans.size > 2) plans.delete(plans.keys().next().value!);
-  promise.catch(() => plans.delete(interval.file));
-  return promise;
-}
-export function useAtlas(year: number, clock: RefObject<PlaybackClock>) {
-  const [data, setData] = useState<{manifest: AtlasManifest; interval: AtlasInterval; plan: AtlasPlan} | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
-    let active = true;
-    const resolve = async (retry: boolean): Promise<void> => {
-      try {
-      const m = await manifest();
-      const index = Math.max(0, m.intervals.findLastIndex(i => i.start <= year));
-      const interval = m.intervals[index];
-      const plan = await load(interval);
-      if (!active) return;
-      setError(null);
-      setData(previous => previous?.plan === plan ? previous : {manifest: m, interval, plan});
-      clock.current.floor = interval.start; clock.current.ceiling = interval.end;
-      const next = m.intervals[index + 1];
-      if (next) void load(next).catch(() => {});
-      } catch (e) {
-        // A tab may outlive a deployment. Refresh the manifest once if an old
-        // content-addressed chunk is no longer on the host.
-        if (active && retry) {manifestPromise = undefined; await resolve(false);}
-        else if (active) setError(e instanceof Error ? e.message : 'Unable to load boundaries');
+function startWorker(interval: AtlasInterval): LoadJob {
+  const worker = new Worker('/atlas-loader.worker.js?v=1', {type: 'module'});
+  let rejectJob: (error: Error) => void;
+  const promise = new Promise<AtlasPlan>((resolve, reject) => {
+    rejectJob = reject;
+    worker.onmessage = ({data}: MessageEvent<{buffer?: ArrayBuffer; error?: string}>) => {
+      if (data.error) {worker.terminate(); reject(new Error(data.error));}
+      else if (data.buffer) {
+        try {resolve(decodePlan(data.buffer, interval));} catch (error) {reject(error);}
+        // The worker closes after persisting compressed data. Until then,
+        // the next load or unmount can still terminate it.
       }
     };
-    // Coalesce rapid manual scrubbing across centuries. Playback handoffs
-    // are immediate; dragging must not fetch the whole timeline.
-    const timer = setTimeout(() => void resolve(true), clock.current.running || year >= clock.current.floor && year < clock.current.ceiling ? 0 : 60);
+    worker.onerror = event => {event.preventDefault(); worker.terminate(); reject(new Error(event.message || 'Boundary worker failed'));};
+    worker.postMessage(interval);
+  });
+  return {promise, cancel: () => {worker.terminate(); rejectJob(cancelledLoad());}};
+}
+
+type AtlasData = {manifest: AtlasManifest; interval: AtlasInterval; plan: AtlasPlan};
+export function useAtlas(year: number, clock: RefObject<PlaybackClock>) {
+  const [manifest, setManifest] = useState<AtlasManifest | null>(null);
+  const [data, setData] = useState<AtlasData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loader, setLoader] = useState<AtlasLoader | null>(null);
+  const [revision, setRevision] = useState(0);
+  const [stats, setStats] = useState({active: 0, cached: 0, started: 0, cancelled: 0, bytes: 0});
+  useEffect(() => {
+    let worker: LoadJob | undefined, alive = true;
+    const instance = new AtlasLoader(interval => {
+      worker?.cancel();
+      worker = startWorker(interval);
+      return worker;
+    }, () => {if (alive) queueMicrotask(() => {if (alive) setStats(instance.snapshot());});});
+    queueMicrotask(() => {if (alive) setLoader(instance);});
+    return () => {alive = false; instance.dispose(); worker?.cancel();};
+  }, []);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch('/atlas/manifest.json', {cache: 'no-cache', signal: controller.signal}).then(r => {
+      if (!r.ok) throw new Error('Unable to load historical data'); return r.json() as Promise<AtlasManifest>;
+    }).then(setManifest).catch(e => {if (!controller.signal.aborted) setError(String(e));});
+    return () => controller.abort();
+  }, [revision]);
+  const index = manifest ? Math.max(0, manifest.intervals.findLastIndex(i => i.start <= year)) : -1;
+  const interval = manifest?.intervals[index];
+  // The dependency is the interval, not every integer year or React render.
+  useEffect(() => {
+    if (!manifest || !interval || !loader) return;
+    let active = true;
+    loader.cancelObsolete(interval.file);
+    const timer = setTimeout(() => {
+      const pending = loader.get(interval);
+      void pending.then(plan => {
+        if (!active) return;
+        setData({manifest, interval, plan}); setError(null);
+        clock.current.floor = interval.start; clock.current.ceiling = interval.end;
+      }).catch(e => {
+        if (!active || e?.name === 'AbortError') return;
+        if (!revision) setRevision(1); else setError(e instanceof Error ? e.message : 'Unable to load boundaries');
+      });
+    }, clock.current.running ? 0 : 80);
     return () => {active = false; clearTimeout(timer);};
-  }, [year, clock]);
-  return {data, error};
+  }, [manifest, interval, loader, clock, revision]);
+  useEffect(() => {
+    // Manual back-and-forth keeps the previous interval in cache. Speculation
+    // is only useful during forward playback, never during slider scrubbing.
+    if (clock.current.running && data?.interval === interval && manifest && loader) {
+      const next = manifest.intervals[index + 1];
+      if (next) loader.prefetch(next);
+    }
+  }, [year, data, interval, manifest, index, loader, clock]);
+  return {data, error, stats};
 }

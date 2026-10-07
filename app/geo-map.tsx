@@ -29,7 +29,7 @@ export default function GeoMap({year,query,selectedName,onSelectName,onNamesChan
  useEffect(()=>{if(!focus)return;queueMicrotask(()=>{setCenter(project([focus.lon,focus.lat]));setRotation([-focus.lon,-focus.lat]);setZoom(1.8)})},[focus]);
  const snapshot=sourceYears.filter(v=>v<=year).at(-1)??-10000;
  useEffect(()=>{let alive=true;fetch('/ne_110m_land.geojson').then(r=>r.json()).then(raw=>{const d=raw as {features:Feature[]};if(alive){setLandFeatures(d.features);setLand(d.features.flatMap(f=>flatGeometryPaths(f.geometry)))}}).catch(()=>{});return()=>{alive=false}},[]);
- const {data,error}=useAtlas(year,clock);
+ const {data,error,stats}=useAtlas(year,clock);
  const [renderError,setRenderError]=useState<string|null>(null);
  const names=useMemo(()=>{if(!data)return [];const t=phaseAt(data.plan,year);return [...new Set(data.interval.presence.filter(([,a,b])=>t>=a&&t<=b).map(([id])=>displayName(data.manifest.names[id],year)))].sort((a,b)=>a.localeCompare(b))},[data,year]);
  useEffect(()=>{if(data)onNamesChange(names)},[data,names,onNamesChange]);
@@ -58,7 +58,7 @@ export default function GeoMap({year,query,selectedName,onSelectName,onNamesChan
  const reset=()=>{setZoom(1);setCenter([450,225]);setRotation([-10,-15])};
  return <>
   {(error||renderError)&&<div className="map-loading" role="alert">{error||renderError}</div>}
-  <svg ref={svg} className={`world-map real-map ${mode==='globe'?'globe-map':''}`} viewBox={mode==='globe'?'0 0 900 450':view.join(' ')} role="img" aria-label={`${mode==='globe'?'Rotating globe':'Wrapping world map'} with historic boundaries at ${fmt(year)}. Drag to ${mode==='globe'?'rotate':'pan'} and scroll to zoom.`} preserveAspectRatio="xMidYMid meet" onWheel={onWheel} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp}>
+  <svg data-atlas-active={stats.active} data-atlas-cached={stats.cached} data-atlas-loads={stats.started} data-atlas-cancelled={stats.cancelled} data-atlas-bytes={stats.bytes} ref={svg} className={`world-map real-map ${mode==='globe'?'globe-map':''}`} viewBox={mode==='globe'?'0 0 900 450':view.join(' ')} role="img" aria-label={`${mode==='globe'?'Rotating globe':'Wrapping world map'} with historic boundaries at ${fmt(year)}. Drag to ${mode==='globe'?'rotate':'pan'} and scroll to zoom.`} preserveAspectRatio="xMidYMid meet" onWheel={onWheel} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp}>
    <defs><pattern id="grid" width="75" height="75" patternUnits="userSpaceOnUse"><path d="M75 0H0V75" fill="none" stroke="currentColor" strokeWidth=".7" opacity=".18"/></pattern></defs>
    {mode==='flat'?<>
     <rect x={view[0]} y={view[1]} width={view[2]} height={view[3]} fill="url(#grid)"/>

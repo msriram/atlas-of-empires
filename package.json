@@ -15,9 +15,10 @@
     "test:geometry": "node --import tsx --test tests/*.test.mjs",
     "test": "node --import tsx --test tests/*.test.mjs",
     "build:worker": "node scripts/build-territory-worker.mjs",
-    "predev": "node scripts/ensure-atlas.mjs",
-    "prebuild": "node scripts/ensure-atlas.mjs",
-    "build:atlas": "node --import tsx scripts/build-atlas.ts"
+    "predev": "node scripts/ensure-atlas.mjs && node scripts/build-atlas-worker.mjs",
+    "prebuild": "node scripts/ensure-atlas.mjs && node scripts/build-atlas-worker.mjs",
+    "build:atlas": "node --import tsx scripts/build-atlas.ts",
+    "build:atlas-worker": "node scripts/build-atlas-worker.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

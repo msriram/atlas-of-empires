@@ -3,6 +3,7 @@ import {useEffect, useRef, type RefObject} from 'react';
 import type {AtlasPlan} from './atlas';
 import type {PlaybackClock} from './use-playback';
 import {displayName,colorKey} from './chronology';
+import {AtlasTextures} from './atlas-textures';
 
 const vertex = `#version 300 es
 void main() {
@@ -101,12 +102,13 @@ export default function TerritoryCanvas(props: Props) {
     } catch (e) {current.current.onError(String(e)); return;}
     gl.useProgram(program);
     const uniforms = Object.fromEntries(['uOwners', 'uTiming', 'uPalette', 'uResolution', 'uView', 'uRotation', 'uZoom', 'uPhase', 'uGlobe', 'uDark'].map(n => [n, gl.getUniformLocation(program, n)]));
-    const textures = [0, 1, 2].map(unit => {
+    const paletteTexture = [2].map(unit => {
       const t = gl.createTexture()!; gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); return t;
     });
     gl.uniform1i(uniforms.uOwners, 0); gl.uniform1i(uniforms.uTiming, 1); gl.uniform1i(uniforms.uPalette, 2);
+    const atlasTextures = new AtlasTextures(gl);
     let frame = 0, loaded: AtlasPlan | undefined, paletteKey = '', paletteNames: string[] | undefined, lastDraw = '', dirty = true, measuredFrames = 0, measuredAt = 0, previousFrame = 0;
     const resize = new ResizeObserver(() => {dirty = true;}); resize.observe(element);
     const lost = (e: Event) => {e.preventDefault(); cancelAnimationFrame(frame); current.current.onError('The graphics context was interrupted. Reload to restore the map.');};
@@ -116,14 +118,15 @@ export default function TerritoryCanvas(props: Props) {
       if (now - previousFrame > 150) {measuredAt = now; measuredFrames = 0;}
       previousFrame = now;
       if (loaded !== p.plan) {
-        for (let unit = 0; unit < 2; unit++) {gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, textures[unit]); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG16UI, p.plan.width, p.plan.height, 0, gl.RG_INTEGER, gl.UNSIGNED_SHORT, unit ? p.plan.timing : p.plan.owners);}
+        atlasTextures.bind(p.plan);
+        element.dataset.uploads = String(atlasTextures.uploads);
         loaded = p.plan; dirty = true;
       }
       const nextKey = JSON.stringify([p.selected, p.query, p.dark, p.clock.current.year < -27]);
       if (paletteKey !== nextKey || paletteNames !== p.names) {
         const palette = new Uint8Array(64 * 64 * 4), query = p.query.trim().toLocaleLowerCase();
         p.names.forEach((rawName, i) => {if (!i) return; const name = displayName(rawName, p.clock.current.year); palette.set(rgb(name), i * 4); palette[i * 4 + 3] = (p.selected === name || (query && name.toLocaleLowerCase().includes(query))) ? 255 : query ? 30 : p.dark ? 225 : 210;});
-        gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, textures[2]); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0, gl.RGBA, gl.UNSIGNED_BYTE, palette);
+        gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, paletteTexture[0]); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0, gl.RGBA, gl.UNSIGNED_BYTE, palette);
         paletteKey = nextKey; paletteNames = p.names; dirty = true;
       }
       const year = Math.max(p.plan.start, Math.min(p.plan.end, p.clock.current.year));
@@ -148,7 +151,7 @@ export default function TerritoryCanvas(props: Props) {
       frame = requestAnimationFrame(draw);
     };
     frame = requestAnimationFrame(draw);
-    return () => {cancelAnimationFrame(frame); resize.disconnect(); element.removeEventListener('webglcontextlost', lost); textures.forEach(t => gl.deleteTexture(t)); gl.deleteProgram(program);};
+    return () => {cancelAnimationFrame(frame); resize.disconnect(); element.removeEventListener('webglcontextlost', lost); atlasTextures.dispose(); paletteTexture.forEach(t => gl.deleteTexture(t)); gl.deleteProgram(program);};
   }, []);
   return <canvas ref={canvas} className="territory-canvas" aria-hidden="true"/>;
 }
