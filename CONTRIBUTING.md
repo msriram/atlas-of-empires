@@ -11,7 +11,9 @@ npm ci
 npm run dev
 ```
 
-Open `http://127.0.0.1:5173`. Before a merge request, run:
+Open `http://127.0.0.1:5173`. `npm run dev` builds and serves the optimized local site. For hot reload while editing source, use `npm run dev:hot`. Test animation performance with the optimized build; the hot reload runtime can use substantially more browser memory.
+
+Before a merge request, run:
 
 ```sh
 npm run build:atlas # after changing coordinates or transfer logic
@@ -30,7 +32,7 @@ The dated source maps live in `public/historical/`. Preserve their GPL license a
 
 The live temporal field assigns one owner to a geographic location and evaluates it identically in flat and globe views. `tests/temporal-atlas.test.mjs` checks all adjacent atlas endpoints, every year from 530–460 BCE, connected conquest, Mongol campaigns and quiet years, gradual succession, independent empire calendars, unchanged shapes, holes/dateline wrapping, and the fractional playback clock. Add regression coverage for new periods and test around source dates and dated events. Older polygon-model tests remain as reference for the previous engine; they do not replace the temporal-atlas tests.
 
-For performance changes, check 1y/32× playback in both modes and a reload. The canvas's `data-year`, `data-interval`, `data-fps`, and `data-first-frame-ms` attributes provide local diagnostics without sending telemetry. Check that no old interval remains displayed after its end, and that the UI remains usable while the next interval loads. Do not increase the in-memory or persistent cache bounds without measuring the effect.
+For performance changes, check 1y/32× playback in both modes and a reload using `npm run dev`. The map vector layer's `data-year`, `data-interval`, `data-fps`, and `data-first-frame-ms` attributes provide local diagnostics without sending telemetry. Check that no old interval remains displayed after its end, and that the UI remains usable while the next interval loads. Do not increase the in-memory or persistent cache bounds without measuring the effect.
 
 ## Code and rights
 

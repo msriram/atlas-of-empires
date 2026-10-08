@@ -30,7 +30,6 @@ export default function GeoMap({year,query,selectedName,onSelectName,onNamesChan
  const snapshot=sourceYears.filter(v=>v<=year).at(-1)??-10000;
  useEffect(()=>{let alive=true;fetch('/ne_110m_land.geojson').then(r=>r.json()).then(raw=>{const d=raw as {features:Feature[]};if(alive){setLandFeatures(d.features);setLand(d.features.flatMap(f=>flatGeometryPaths(f.geometry)))}}).catch(()=>{});return()=>{alive=false}},[]);
  const {data,error,stats}=useAtlas(year,clock);
- const [renderError,setRenderError]=useState<string|null>(null);
  const names=useMemo(()=>{if(!data)return [];const t=phaseAt(data.plan,year);return [...new Set(data.interval.presence.filter(([,a,b])=>t>=a&&t<=b).map(([id])=>displayName(data.manifest.names[id],year)))].sort((a,b)=>a.localeCompare(b))},[data,year]);
  useEffect(()=>{if(data)onNamesChange(names)},[data,names,onNamesChange]);
  const activeEvents=historicalEvents.filter(e=>e.year===year); const customNames=new Set((customKeyframes.tracks as {name:string}[]).map(t=>t.name));
@@ -54,11 +53,11 @@ export default function GeoMap({year,query,selectedName,onSelectName,onNamesChan
   if(coordinate){const id=ownerAt(data.plan,coordinate[0],coordinate[1],clock.current.year);onSelectName(displayName(data.manifest.names[id],clock.current.year)||null)}
  }
  const canvasView=mode==='globe'?[0,0,900,450]:view;
- const territoryLayer=data?<foreignObject className="territory-layer" x={canvasView[0]} y={canvasView[1]} width={canvasView[2]} height={canvasView[3]}><TerritoryCanvas plan={data.plan} names={data.manifest.names} clock={clock} view={canvasView} rotation={rotation} zoom={zoom} mode={mode} selected={selectedName} query={query} dark={dark} onError={setRenderError}/></foreignObject>:null;
  const reset=()=>{setZoom(1);setCenter([450,225]);setRotation([-10,-15])};
  return <>
-  {(error||renderError)&&<div className="map-loading" role="alert">{error||renderError}</div>}
-  <svg data-atlas-active={stats.active} data-atlas-cached={stats.cached} data-atlas-loads={stats.started} data-atlas-cancelled={stats.cancelled} data-atlas-bytes={stats.bytes} ref={svg} className={`world-map real-map ${mode==='globe'?'globe-map':''}`} viewBox={mode==='globe'?'0 0 900 450':view.join(' ')} role="img" aria-label={`${mode==='globe'?'Rotating globe':'Wrapping world map'} with historic boundaries at ${fmt(year)}. Drag to ${mode==='globe'?'rotate':'pan'} and scroll to zoom.`} preserveAspectRatio="xMidYMid meet" onWheel={onWheel} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp}>
+  {error&&<div className="map-loading" role="alert">{error}</div>}
+  <div className={`map-frame ${mode==='globe'?'globe-map':''}`}>
+  <svg data-atlas-active={stats.active} data-atlas-cached={stats.cached} data-atlas-loads={stats.started} data-atlas-cancelled={stats.cancelled} data-atlas-bytes={stats.bytes} ref={svg} className="world-map real-map" viewBox={mode==='globe'?'0 0 900 450':view.join(' ')} role="img" aria-label={`${mode==='globe'?'Rotating globe':'Wrapping world map'} with historical boundaries. Drag to ${mode==='globe'?'rotate':'pan'} and scroll to zoom.`} preserveAspectRatio="xMidYMid meet" onWheel={onWheel} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp}>
    <defs><pattern id="grid" width="75" height="75" patternUnits="userSpaceOnUse"><path d="M75 0H0V75" fill="none" stroke="currentColor" strokeWidth=".7" opacity=".18"/></pattern></defs>
    {mode==='flat'?<>
     <rect x={view[0]} y={view[1]} width={view[2]} height={view[3]} fill="url(#grid)"/>
@@ -67,7 +66,9 @@ export default function GeoMap({year,query,selectedName,onSelectName,onNamesChan
     <path d={globePath({type:'Sphere'} as never)||''} className="globe-ocean"/>
     <g className="land real-land">{landFeatures.map((f,i)=><path key={i} d={globePath(f.geometry as never)||''}/>)}</g>
    </>}
-   {territoryLayer}
+  </svg>
+  {data&&<TerritoryCanvas plan={data.plan} names={data.manifest.names} clock={clock} view={canvasView} rotation={rotation} zoom={zoom} mode={mode} selected={selectedName} query={query} dark={dark}/>}
+  <svg className="map-event-overlay" viewBox={mode==='globe'?'0 0 900 450':view.join(' ')} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
    {mode==='flat'?repeats.map(copy=><g key={copy} transform={`translate(${copy*900} 0)`}>
     <g className="map-lines"><path d="M0 225H900 M450 0V450"/><path d="M0 112.5H900 M0 337.5H900"/></g>
     {activeEvents.map(e=>{const [x,y]=project([e.lon,e.lat]);return <g key={e.id} className="historical-event" transform={`translate(${x} ${y})`}><circle r="9" className="event-halo"/><circle r="4" className="event-core"/></g>})}
@@ -77,6 +78,7 @@ export default function GeoMap({year,query,selectedName,onSelectName,onNamesChan
    </>}
 
   </svg>
+  </div>
   <div className="zoom-controls"><button aria-label="Zoom in" onClick={()=>zoomAt(1.5)}><Plus size={18}/></button><button aria-label="Zoom out" onClick={()=>zoomAt(1/1.5)}><Minus size={18}/></button><button aria-label="Reset map view" onClick={reset}><LocateFixed size={18}/></button></div>
   <div className="boundary-source">Boundaries: {fmt(snapshot)} source map · dated campaigns; other borders held <span>·</span> Scroll to zoom · Drag to {mode==='globe'?'rotate':'pan'}</div>
   {activeEvents[0]&&<aside className="event-detail"><span className="eyebrow">KEY EVENT · {fmt(year)}</span><h2>{activeEvents[0].title}</h2><p>{activeEvents[0].summary}</p><a href={activeEvents[0].source} target="_blank" rel="noreferrer">Historical source</a></aside>}

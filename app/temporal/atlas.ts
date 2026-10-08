@@ -30,7 +30,7 @@ export function incomingWeight(arrival: number, width: number, phase: number) {
   if (phase >= 1) return 1;
   return Math.max(0, Math.min(1, .5 + (phase - arrival / 65535) / Math.max(1 / 65535, width / 65535)));
 }
-/** Same nearest geographic cell and arrival threshold as the GPU shader. */
+/** Same nearest geographic cell and arrival threshold as the vector renderer. */
 export function ownerAt(plan: AtlasPlan, lon: number, lat: number, year: number): number {
   if (lat < -90 || lat > 90) return 0;
   const x = Math.round((lon + 180) / 360 * plan.width - .5);

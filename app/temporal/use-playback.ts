@@ -31,7 +31,7 @@ export function usePlayback(initialYear: number) {
       if (document.hidden) {last = 0; frame = requestAnimationFrame(tick); return;}
       if (last) clock.current.year = advanceYear(clock.current.year, now - last, step, speed, clock.current.ceiling);
       last = now;
-      // The canvas reads the fractional clock directly. React only needs to
+      // The map renderer reads the fractional clock directly. React only needs to
       // refresh labels and interval selection five times per second.
       if (now - publishedAt >= 200 || clock.current.year === clock.current.ceiling) {
         publishYear(Math.floor(clock.current.year + 1e-7)); publishedAt = now;

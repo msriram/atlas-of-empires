@@ -1,6 +1,6 @@
 # Atlas of Empires
 
-An interactive, approximate world timeline from 10,000 BCE to today. Run locally with `npm run dev` in this directory.
+An interactive, approximate world timeline from 10,000 BCE to today. Run locally with `npm run dev` in this directory. That command builds and serves the optimized site at `http://127.0.0.1:5173`; `npm run dev:hot` is available for source editing with hot reload.
 
 ## Historical boundaries
 
@@ -14,15 +14,15 @@ The live map uses a precomputed temporal atlas, replacing the old per-year polyg
 2. `app/data/empire-timelines.json` gives each empire its own dated regional campaigns, pauses, gains, and losses. `scripts/lib/campaign-chronology.ts` applies these calendars to the relevant geographic portions of the source outlines. There is no shared world growth schedule. Unchanged geography stays fixed. **Missing annual evidence holds the last source border until the next dated map**; a source-map update is not presented as a dated conquest.
 3. `scripts/lib/ownership-field.ts` orders a campaign front through connected target geography from retained territory. Each location records previous/next ownership, arrival time, and a narrow sub-year smoothing band. Disconnected components may seed locally when the route is unknown. Polygons are never scaled into growing or shrinking circles. The geographic selectors and resistance are illustrative, not surveyed campaign fronts or measured terrain.
 4. `public/atlas/manifest.json` indexes content-addressed, compressed interval files. They encode any annual **or fractional-year** sample without storing thousands of redundant annual polygons.
-5. `app/temporal/territory-canvas.tsx` evaluates the same field on the GPU in flat or orthographic globe coordinates. Land has one displayed owner. Clicking and rendering use the same geographic sampling. Shared endpoints are identical across intervals.
+5. `app/temporal/territory-canvas.tsx` samples the field into bounded vector paths in flat or orthographic globe coordinates. Land has one displayed owner. Clicking and rendering use the same geographic ownership field. Shared endpoints are identical across intervals.
 
-Animated intermediate shapes are **estimates, not recovered historical annual coordinates**. The grid also limits very small states and extreme zoom detail. Add dated coordinate keyframes to improve the historical result; interpolation cannot supply missing evidence. The browser needs WebGL 2 for animated boundaries.
+Animated intermediate shapes are **estimates, not recovered historical annual coordinates**. The grid also limits very small states and extreme zoom detail. Add dated coordinate keyframes to improve the historical result; interpolation cannot supply missing evidence.
 
 ### Playback and performance
 
-Choose a 1, 10, 100, or 1,000-year step and a speed from ¼× to 32× beside Play. Playback advances `step × speed` years per second using a fractional-year animation clock. With **1y and 32×**, that means 32 years per second while rendering intermediate frames. The sidebar updates at most five times per second while the map paints up to sixteen frames per second. Scrubbing or selecting a search result pauses playback; a hidden tab does not catch up in a burst.
+Choose a 1, 10, 100, or 1,000-year step and a speed from ¼× to 32× beside Play. Playback advances `step × speed` years per second using a fractional-year animation clock. With **1y and 32×**, that means 32 years per second while rendering intermediate frames. The sidebar updates at most five times per second while the vector map updates at most twelve times per second. Scrubbing or selecting a search result pauses playback; a hidden tab does not catch up in a burst.
 
-The browser runs at most one fetch/decompression worker at a time. Seeking to another interval terminates obsolete work before starting its replacement; decoded buffers transfer to the renderer without copying. It retains the current and previous completed intervals (at most two, about 16 MiB total), and caches at most six compressed files on disk. Forward playback may prefetch its successor; manual scrubbing never triggers speculative loads. Two GPU interval slots are retained separately: reversing between them only binds textures, and loading another interval reuses a slot. It does not download the full atlas. The clock waits at an uncached interval boundary so the date cannot outrun the map. A new deployment refreshes a stale manifest automatically once. Reloads reuse cached geographic data.
+The browser runs at most one fetch/decompression worker at a time. Seeking to another interval terminates obsolete work before starting its replacement; decoded buffers transfer to the renderer without copying. It retains the current and previous completed intervals (at most two, about 16 MiB total), and caches at most six compressed files on disk. Forward playback may prefetch its successor; manual scrubbing never triggers speculative loads. The vector layer is bounded in resolution and updates only when the displayed ownership or palette changes. It does not download the full atlas. The clock waits at an uncached interval boundary so the date cannot outrun the map. A new deployment refreshes a stale manifest automatically once. Reloads reuse cached geographic data.
 
 ## Add, change, or remove an empire
 
