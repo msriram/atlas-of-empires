@@ -16,7 +16,9 @@ import {canonicalName, type Chronology} from '../app/temporal/chronology';
 // times more atlas data than playback can draw.
 const width = 1440, height = 720, dir = 'public/atlas';
 const sourceYears = readdirSync('public/historical').filter(f => /^-?\d+\.json$/.test(f)).map(f => Number(f.slice(0, -5))).sort((a, b) => a - b);
-const sources = new Map<number, Boundary[]>(sourceYears.map(y => [y, JSON.parse(readFileSync(`public/historical/${y}.json`, 'utf8')).map((b: Boundary) => ({...b, n: canonicalName(b.n, y)}))]));
+// Some source polygons have placeholder labels ("1", "3", blanks, "?").
+// Their identities cannot be inferred from geometry, so omit them from named territories.
+const sources = new Map<number, Boundary[]>(sourceYears.map(y => [y, JSON.parse(readFileSync(`public/historical/${y}.json`, 'utf8')).filter((b: Boundary) => !/^(?:\d+|\?)?$/.test(b.n.trim())).map((b: Boundary) => ({...b, n: canonicalName(b.n, y)}))]));
 const tracks = keyframes.tracks as {name: string; frames: ({year: number} & Pick<Boundary, 'r'>)[]}[];
 const chronology = timelineData as Chronology;
 for (const track of tracks) chronology.profiles.push({id: `custom:${track.name}`, names: [track.name], origin: track.frames[0]?.r[0]?.[0] ?? [0,0], fallback: 'estimated', source: 'Authored coordinate keyframes', stages: []});
