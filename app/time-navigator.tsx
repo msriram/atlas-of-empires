@@ -4,13 +4,14 @@ import {Minus, Plus} from 'lucide-react';
 import {historicalEvents} from './data/events';
 
 const MIN = -10000, MAX = 2026, TOTAL = MAX - MIN;
+const MIN_SPAN = 10;
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 const label = (y: number) => y < 0 ? `${Math.abs(y).toLocaleString()} BCE` : y === 0 ? '1 BCE' : `${y.toLocaleString()} CE`;
 const boundsAround = (year: number, span: number): [number, number] => {
   const start = Math.round(clamp(year - span / 2, MIN, MAX - span));
   return [start, start + span];
 };
-type Drag = {kind: 'window' | 'year'; startX: number; range: [number, number]; year: number; moved: boolean};
+type Drag = {kind: 'window' | 'year' | 'start' | 'end'; startX: number; range: [number, number]; year: number; moved: boolean};
 
 /** One control: its location selects the era; its interior scrubs that era. */
 export default function TimeNavigator({year, onChange}: {year: number; onChange: (year: number) => void}) {
@@ -41,7 +42,7 @@ export default function TimeNavigator({year, onChange}: {year: number; onChange:
     }
   };
   const zoom = (factor: number) => {
-    const nextSpan = clamp(Math.round(span * factor), 10, TOTAL);
+    const nextSpan = clamp(Math.round(span * factor), MIN_SPAN, TOTAL);
     setStoredRange(boundsAround(year, nextSpan));
   };
   const overviewYear = (x: number) => {
@@ -52,14 +53,14 @@ export default function TimeNavigator({year, onChange}: {year: number; onChange:
     const rect = detailRef.current!.getBoundingClientRect();
     return Math.round(range[0] + clamp((x - rect.left) / rect.width, 0, 1) * (range[1] - range[0]));
   };
-  const startDrag = (event: React.PointerEvent<HTMLDivElement>, kind: Drag['kind']) => {
+  const startDrag = (event: React.PointerEvent<HTMLElement>, kind: Drag['kind']) => {
     if (event.button !== 0) return;
     event.stopPropagation();
     drag.current = {kind, startX: event.clientX, range: [start, end], year, moved: false};
     event.currentTarget.setPointerCapture(event.pointerId);
     if (kind === 'year') publish(yearInsideWindow(event.clientX), true);
   };
-  const moveDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+  const moveDrag = (event: React.PointerEvent<HTMLElement>) => {
     const current = drag.current;
     if (!current) return;
     if (Math.abs(event.clientX - current.startX) > 2) current.moved = true;
@@ -70,11 +71,19 @@ export default function TimeNavigator({year, onChange}: {year: number; onChange:
     }
     const rect = overview.current!.getBoundingClientRect();
     const delta = Math.round((event.clientX - current.startX) / rect.width * TOTAL);
+    if (current.kind === 'start' || current.kind === 'end') {
+      const nextStart = current.kind === 'start' ? clamp(current.range[0] + delta, MIN, current.range[1] - MIN_SPAN) : current.range[0];
+      const nextEnd = current.kind === 'end' ? clamp(current.range[1] + delta, current.range[0] + MIN_SPAN, MAX) : current.range[1];
+      setStoredRange([nextStart, nextEnd]);
+      const nextYear = clamp(current.year, nextStart, nextEnd);
+      if (nextYear !== year) publish(nextYear, true);
+      return;
+    }
     const nextStart = Math.round(clamp(current.range[0] + delta, MIN, MAX - span));
     setStoredRange([nextStart, nextStart + span]);
     publish(clamp(current.year + nextStart - current.range[0], nextStart, nextStart + span));
   };
-  const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+  const endDrag = (event: React.PointerEvent<HTMLElement>) => {
     if (!drag.current) return;
     drag.current = null;
     event.currentTarget.releasePointerCapture(event.pointerId);
@@ -91,14 +100,18 @@ export default function TimeNavigator({year, onChange}: {year: number; onChange:
   return <div className="time-navigator" aria-label="Historical timeline">
     <div className="time-navigator-heading">
       <span>FOCUS · {label(start)} – {label(end)}</span>
-      <span>Move the window · drag inside to choose a year</span>
+      <span>Drag center to move · drag edges to resize</span>
       <div className="time-zoom">
         <button onClick={() => zoom(2)} aria-label="Zoom timeline out" disabled={span >= TOTAL}><Minus size={15}/></button>
-        <button onClick={() => zoom(.5)} aria-label="Zoom timeline in" disabled={span <= 10}><Plus size={15}/></button>
+        <button onClick={() => zoom(.5)} aria-label="Zoom timeline in" disabled={span <= MIN_SPAN}><Plus size={15}/></button>
       </div>
     </div>
     <div ref={overview} className="time-overview" onClick={jump}>
-      <div className="time-focus-selection" style={{left: `${position}%`, width: `${width}%`}} role="slider" tabIndex={0} aria-label="Move focused time window" aria-valuemin={MIN} aria-valuemax={MAX} aria-valuenow={Math.round((start + end) / 2)} aria-valuetext={`${label(start)} to ${label(end)}`} onPointerDown={event => startDrag(event, 'window')} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag} onKeyDown={event => {if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {event.preventDefault(); const delta = event.key === 'ArrowLeft' ? -step : step; const nextStart = Math.round(clamp(start + delta, MIN, MAX - span)); setStoredRange([nextStart, nextStart + span]); publish(clamp(year + nextStart - start, nextStart, nextStart + span), true);}}}><span className="time-focus-grip"/></div>
+      <div className="time-focus-selection" style={{left: `${position}%`, width: `${width}%`}} role="slider" tabIndex={0} aria-label="Move focused time window" aria-valuemin={MIN} aria-valuemax={MAX} aria-valuenow={Math.round((start + end) / 2)} aria-valuetext={`${label(start)} to ${label(end)}`} onPointerDown={event => startDrag(event, 'window')} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag} onKeyDown={event => {if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {event.preventDefault(); const delta = event.key === 'ArrowLeft' ? -step : step; const nextStart = Math.round(clamp(start + delta, MIN, MAX - span)); setStoredRange([nextStart, nextStart + span]); publish(clamp(year + nextStart - start, nextStart, nextStart + span), true);}}}>
+        <button type="button" className="time-focus-handle time-focus-handle-start" aria-label="Resize focus window from start" title="Drag to change the start year" onPointerDown={event => startDrag(event, 'start')} onPointerMove={event => {event.stopPropagation(); moveDrag(event);}} onPointerUp={event => {event.stopPropagation(); endDrag(event);}} onPointerCancel={event => {event.stopPropagation(); endDrag(event);}} onKeyDown={event => {const delta = event.key === 'ArrowLeft' ? -step : event.key === 'ArrowRight' ? step : 0; if (delta) {event.preventDefault(); event.stopPropagation(); const nextStart = clamp(start + delta, MIN, end - MIN_SPAN); setStoredRange([nextStart, end]); if (year < nextStart) publish(nextStart, true);}}}/>
+        <span className="time-focus-grip"/>
+        <button type="button" className="time-focus-handle time-focus-handle-end" aria-label="Resize focus window from end" title="Drag to change the end year" onPointerDown={event => startDrag(event, 'end')} onPointerMove={event => {event.stopPropagation(); moveDrag(event);}} onPointerUp={event => {event.stopPropagation(); endDrag(event);}} onPointerCancel={event => {event.stopPropagation(); endDrag(event);}} onKeyDown={event => {const delta = event.key === 'ArrowLeft' ? -step : event.key === 'ArrowRight' ? step : 0; if (delta) {event.preventDefault(); event.stopPropagation(); const nextEnd = clamp(end + delta, start + MIN_SPAN, MAX); setStoredRange([start, nextEnd]); if (year > nextEnd) publish(nextEnd, true);}}}/>
+      </div>
     </div>
     <div className="time-ticks"><span>10,000 BCE</span><span style={{left: `${5000 / TOTAL * 100}%`}}>5,000 BCE</span><span style={{left: `${10000 / TOTAL * 100}%`}}>1 CE</span><span>Present</span></div>
     <div className="time-detail-caption"><span>{label(start)}</span><span>ZOOMED FOCUS · drag to scrub by year</span><span>{label(end)}</span></div>
