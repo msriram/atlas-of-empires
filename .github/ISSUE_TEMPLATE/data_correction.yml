@@ -1,0 +1,40 @@
+name: Historical data correction
+description: Suggest a new civilization, a boundary correction, a date, or a source.
+title: "[Data] "
+body:
+  - type: markdown
+    attributes:
+      value: "Historical boundaries are approximate. Please provide a source and describe uncertainty; a dated event alone may not establish an exact border."
+  - type: input
+    id: entity
+    attributes:
+      label: Civilization or region
+      placeholder: "Name used in the atlas or proposed new name"
+    validations:
+      required: true
+  - type: input
+    id: period
+    attributes:
+      label: Year or date range
+      placeholder: "For example, 1206–1260 CE"
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: Proposed correction
+      description: Describe the area, event, name, or timing that should change.
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Historical sources and uncertainty
+      description: Link maps, books, papers, or other evidence and explain any disagreement between sources.
+    validations:
+      required: true
+  - type: textarea
+    id: coordinates
+    attributes:
+      label: Coordinates or sketch (optional)
+      description: Longitude/latitude GeoJSON, a map image, or a rough sketch can help.

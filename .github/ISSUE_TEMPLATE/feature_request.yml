@@ -1,0 +1,22 @@
+name: Feature idea or feedback
+description: Suggest a usability, accessibility, data, or collaboration improvement.
+title: "[Idea] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What would you like to do?
+      description: Explain the need in your own words.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Suggested change
+      description: Describe an approach if you have one. Screenshots or examples are welcome.
+  - type: textarea
+    id: references
+    attributes:
+      label: Related projects or references
+      description: Links to useful examples, sources, or existing issues.

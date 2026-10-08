@@ -1,6 +1,44 @@
 # Atlas of Empires
 
-An interactive, approximate world timeline from 10,000 BCE to today. Run locally with `npm run dev` in this directory. That command builds and serves the optimized site at `http://127.0.0.1:5173`; `npm run dev:hot` is available for source editing with hot reload.
+Explore how civilizations and political boundaries changed from **10,000 BCE to today** on a pannable world map or rotating globe. Scrub to any year, widen or narrow the focus window by dragging its edges, search for a civilization, and play territorial changes at up to 32× speed.
+
+> **Historical caution:** Borders between dated source maps are estimates. Ancient and disputed boundaries may be uncertain. This is an educational visualization, not a record of legal sovereignty.
+
+## Screenshots
+
+| Ancient world · 530 BCE | Medieval globe · 1260 CE |
+| --- | --- |
+| ![Dark world map showing the ancient world at 530 BCE](docs/screenshots/ancient-flat.jpg) | ![Rotating globe centered on Eurasia at 1260 CE](docs/screenshots/medieval-globe.jpg) |
+
+![Light world map showing political regions in 1914 CE](docs/screenshots/modern-day-mode.jpg)
+
+## Try it locally
+
+Requires Node.js 22.13 or newer.
+
+```sh
+git clone https://github.com/msriram/atlas-of-empires.git
+cd atlas-of-empires
+npm ci
+npm run dev
+```
+
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173). `npm run dev` builds and serves the optimized site; use `npm run dev:hot` when editing code and needing hot reload. The optimized build is the right place to assess animation performance. No account or API key is needed to explore the map.
+
+**Navigation:** drag or scroll the map to pan and zoom; switch to Globe view to rotate it. Drag the **middle** of the small focus bar to move through eras, drag either **edge** to resize it, and drag the enlarged bar below to select a year. The + and − buttons also resize the focus window. Search jumps to a matching civilization's mapped period.
+
+Saved views currently use this browser's local storage. Google account sync is planned and needs OAuth and a persistent backend; it is not part of this repository's current runtime.
+
+## Collaborate
+
+Contributions to geography, citations, history, accessibility, and performance are welcome:
+
+1. Check [open issues](https://github.com/msriram/atlas-of-empires/issues) for an existing report.
+2. For a wrong or missing boundary, open a [historical data correction](https://github.com/msriram/atlas-of-empires/issues/new/choose) and include a date, region, source, and the uncertainty.
+3. For a bug or an idea, use the matching [issue template](https://github.com/msriram/atlas-of-empires/issues/new/choose). Issues are also the place to give feedback on how to improve the atlas.
+4. Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [data contribution guide](docs/DATA_CONTRIBUTIONS.md), then open a [pull request](https://github.com/msriram/atlas-of-empires/pulls). Small, sourced corrections are especially helpful.
+
+See the [project limitations](#historical-boundaries) before interpreting an animated outline as a surveyed annual border.
 
 ## Historical boundaries
 
@@ -81,6 +119,26 @@ Drag to pan the flat map, which repeats east to west. Drag to rotate the globe. 
 
 ## Analytics and publication
 
-Analytics use Umami when `NEXT_PUBLIC_UMAMI_WEBSITE_ID` is set to a website ID from your Umami dashboard. Copy `.env.example` to `.env.local` for local testing, or set the variable in your hosting environment before building. The tracker honors Do Not Track and records pageviews plus save/view-switch counts. Search queries and saved views are not custom event data. Without an ID, the tracker is disabled. GitLab source publication alone does not host the application; use a compatible Next.js/Vinext host for the live site.
+Analytics use Umami when `NEXT_PUBLIC_UMAMI_WEBSITE_ID` is set to a website ID from your Umami dashboard. Copy `.env.example` to `.env.local` for local testing, or set the variable in your hosting environment before building. The tracker honors Do Not Track and records pageviews plus save/view-switch counts. Search queries and saved views are not custom event data. Without an ID, the tracker is disabled. Publishing source on GitHub does not host the live application; use a compatible Next.js/Vinext host for deployment.
 
-See [COPYRIGHT.md](COPYRIGHT.md), [LICENSE](LICENSE), and [CONTRIBUTING.md](CONTRIBUTING.md). The GitLab pipeline runs tests, lint, and build on merge requests.
+## Related projects
+
+This is a selected list of complementary historical mapping projects, not a claim that every similar project has been catalogued. Their data, licenses, and historical interpretations differ:
+
+| Project | What it offers |
+| --- | --- |
+| [Running Reality](https://www.runningreality.org/) | A detailed world history model with a map, timeline, and research tools. |
+| [Chronas](https://www.chronas.org/) | An interactive historical map with linked context. |
+| [GeaCron](https://geacron.com/) | A historical atlas with year-based political maps and timelines. |
+| [TimeMap / OldMapsOnline](https://www.oldmapsonline.org/en/history/about-timemap) | Time navigation through historical maps, regions, and events. |
+| [OpenHistoricalMap](https://www.openhistoricalmap.org/) | A collaborative, time-aware map of world history. |
+| [historical-basemaps](https://github.com/aourednik/historical-basemaps) | Open GeoJSON snapshots used as a source for this project's dated boundary data. |
+| [Point in History](https://hanshack.com/point-in-history/) | Shows the dated historical map at a chosen point on Earth. |
+| [Ourednik's historical map app](https://ourednik.info/historicalmaps/app.html) | Explores the source boundary dataset in alternative map projections. |
+| [AtlasPI](https://atlaspi.it/) | Sourced historical geography data, API, and interactive map. |
+| [Strata](https://github.com/dr-nico-f/strata) | An open source world history map with multiple data layers. |
+| [Chronoglobe](https://github.com/knalpas/chronoglobe) | An open source historical globe with a timeline. |
+| [Atlas with stories](https://github.com/daiyip/atlas) | An open source map with historical stories and dated borders. |
+| [World History Web](https://github.com/haakram/WHW) | An open source 3D history globe with events and tours. |
+
+See [COPYRIGHT.md](COPYRIGHT.md), [LICENSE](LICENSE), and [CONTRIBUTING.md](CONTRIBUTING.md). GitHub Actions checks tests, lint, type checking, and build on pull requests.

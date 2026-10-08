@@ -1,0 +1,27 @@
+name: Bug report
+description: Report broken map behavior, a crash, or a performance problem.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "Thanks for helping improve Atlas of Empires. Please include a year and map mode if the problem is visual."
+  - type: input
+    id: year
+    attributes:
+      label: Year and view
+      description: "For example, 530 BCE, flat map, dark mode."
+      placeholder: "Year, flat/globe, day/night"
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened?
+      description: Add steps to reproduce, screenshots, and browser/device details if useful.
+    validations:
+      required: true
