@@ -7,7 +7,7 @@ const CACHE = 'atlas-geography-v2';
 // pending buffers, and cache writes stop together, outside the UI thread.
 scope.onmessage = async ({data: interval}: MessageEvent<AtlasInterval>) => {
   try {
-    const url = `/atlas/${interval.file}`;
+    const url = new URL(`atlas/${interval.file}`, scope.location.href).toString();
     let disk: Cache | undefined;
     try {disk = await caches.open(CACHE);} catch {/* Storage is optional. */}
     let response = await disk?.match(url);

@@ -11,6 +11,7 @@ import empireTimelines from './data/empire-timelines.json';
 import type {PlaybackClock} from './temporal/use-playback';
 import TerritoryCanvas from './temporal/territory-canvas';
 import customKeyframes from './data/territory-keyframes.json';
+import {assetPath} from './asset-path';
 
 type Feature={geometry:{type:string;coordinates:unknown}};
 type ViewMode='flat'|'globe';
@@ -28,7 +29,7 @@ export default function GeoMap({year,query,selectedName,onSelectName,onNamesChan
  const [zoom,setZoom]=useState(1);const [center,setCenter]=useState<Point>([450,225]);const [rotation,setRotation]=useState<Point>([-10,-15]);
  useEffect(()=>{if(!focus)return;queueMicrotask(()=>{setCenter(project([focus.lon,focus.lat]));setRotation([-focus.lon,-focus.lat]);setZoom(1.8)})},[focus]);
  const snapshot=sourceYears.filter(v=>v<=year).at(-1)??-10000;
- useEffect(()=>{let alive=true;fetch('/ne_110m_land.geojson').then(r=>r.json()).then(raw=>{const d=raw as {features:Feature[]};if(alive){setLandFeatures(d.features);setLand(d.features.flatMap(f=>flatGeometryPaths(f.geometry)))}}).catch(()=>{});return()=>{alive=false}},[]);
+ useEffect(()=>{let alive=true;fetch(assetPath('/ne_110m_land.geojson')).then(r=>r.json()).then(raw=>{const d=raw as {features:Feature[]};if(alive){setLandFeatures(d.features);setLand(d.features.flatMap(f=>flatGeometryPaths(f.geometry)))}}).catch(()=>{});return()=>{alive=false}},[]);
  const {data,error,stats}=useAtlas(year,clock);
  const names=useMemo(()=>{if(!data)return [];const t=phaseAt(data.plan,year);return [...new Set(data.interval.presence.filter(([,a,b])=>t>=a&&t<=b).map(([id])=>displayName(data.manifest.names[id],year)))].sort((a,b)=>a.localeCompare(b))},[data,year]);
  useEffect(()=>{if(data)onNamesChange(names)},[data,names,onNamesChange]);

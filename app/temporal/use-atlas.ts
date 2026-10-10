@@ -3,9 +3,10 @@ import {useEffect, useState, type RefObject} from 'react';
 import {decodePlan, type AtlasManifest, type AtlasInterval, type AtlasPlan} from './atlas';
 import {AtlasLoader, cancelledLoad, type LoadJob} from './atlas-loader';
 import type {PlaybackClock} from './use-playback';
+import {assetPath} from '../asset-path';
 
 function startWorker(interval: AtlasInterval): LoadJob {
-  const worker = new Worker('/atlas-loader.worker.js?v=1', {type: 'module'});
+  const worker = new Worker(assetPath('/atlas-loader.worker.js?v=1'), {type: 'module'});
   let rejectJob: (error: Error) => void;
   const promise = new Promise<AtlasPlan>((resolve, reject) => {
     rejectJob = reject;
@@ -43,7 +44,7 @@ export function useAtlas(year: number, clock: RefObject<PlaybackClock>) {
   }, []);
   useEffect(() => {
     const controller = new AbortController();
-    fetch('/atlas/manifest.json', {cache: 'no-cache', signal: controller.signal}).then(r => {
+    fetch(assetPath('/atlas/manifest.json'), {cache: 'no-cache', signal: controller.signal}).then(r => {
       if (!r.ok) throw new Error('Unable to load historical data'); return r.json() as Promise<AtlasManifest>;
     }).then(setManifest).catch(e => {if (!controller.signal.aborted) setError(String(e));});
     return () => controller.abort();

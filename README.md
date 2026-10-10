@@ -2,6 +2,8 @@
 
 Explore how civilizations and political boundaries changed from **10,000 BCE to today** on a pannable world map or rotating globe. Scrub to any year, widen or narrow the focus window by dragging its edges, search for a civilization, and play territorial changes at up to 32× speed.
 
+**[Open the live atlas on GitHub Pages →](https://msriram.github.io/atlas-of-empires/)**
+
 > **Historical caution:** Borders between dated source maps are estimates. Ancient and disputed boundaries may be uncertain. This is an educational visualization, not a record of legal sovereignty.
 
 ## Screenshots
@@ -12,18 +14,9 @@ Explore how civilizations and political boundaries changed from **10,000 BCE to 
 
 ![Light world map showing political regions in 1914 CE](docs/screenshots/modern-day-mode.jpg)
 
-## Try it locally
+## Use the atlas
 
-Requires Node.js 22.13 or newer.
-
-```sh
-git clone https://github.com/msriram/atlas-of-empires.git
-cd atlas-of-empires
-npm ci
-npm run dev
-```
-
-Open [http://127.0.0.1:5173](http://127.0.0.1:5173). `npm run dev` builds and serves the optimized site; use `npm run dev:hot` when editing code and needing hot reload. The optimized build is the right place to assess animation performance. No account or API key is needed to explore the map.
+Visit **[msriram.github.io/atlas-of-empires](https://msriram.github.io/atlas-of-empires/)** in your browser. No installation or account is needed to explore the map.
 
 **Navigation:** drag or scroll the map to pan and zoom; switch to Globe view to rotate it. Drag the **middle** of the small focus bar to move through eras, drag either **edge** to resize it, and drag the enlarged bar below to select a year. The + and − buttons also resize the focus window. Search jumps to a matching civilization's mapped period.
 
@@ -119,7 +112,7 @@ Drag to pan the flat map, which repeats east to west. Drag to rotate the globe. 
 
 ## Analytics and publication
 
-Analytics use Umami when `NEXT_PUBLIC_UMAMI_WEBSITE_ID` is set to a website ID from your Umami dashboard. Copy `.env.example` to `.env.local` for local testing, or set the variable in your hosting environment before building. The tracker honors Do Not Track and records pageviews plus save/view-switch counts. Search queries and saved views are not custom event data. Without an ID, the tracker is disabled. Publishing source on GitHub does not host the live application; use a compatible Next.js/Vinext host for deployment.
+The site is exported as static HTML, CSS, JavaScript, and atlas data and deployed to GitHub Pages from `main` by [the Pages workflow](.github/workflows/pages.yml). The export is configured for the `/atlas-of-empires/` path. Analytics use Umami when `NEXT_PUBLIC_UMAMI_WEBSITE_ID` is set in the Pages build environment. The tracker honors Do Not Track and records pageviews plus save/view-switch counts. Search queries and saved views are not custom event data. Without an ID, the tracker is disabled.
 
 ## Related projects
 
