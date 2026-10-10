@@ -4,6 +4,7 @@ import type {AtlasPlan} from './atlas';
 import type {PlaybackClock} from './use-playback';
 import {displayName, colorKey} from './chronology';
 import {visibleSvgView} from './svg-viewport';
+import {traceOwnershipContours} from './contours';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 function rgb(name: string) {
@@ -32,7 +33,7 @@ export default function TerritoryCanvas(props: Props) {
     let frame = 0, previousFrame = 0, measuredAt = 0, changedFrames = 0;
     let sampleWidth = 0, sampleHeight = 0, viewportWidth = 1, viewportHeight = 1, positionDirty = true, quality = false;
     let geometryKey = '', lastYear = NaN, paletteKey = '';
-    let coordinates = new Int32Array(0), paletteNames: string[] | undefined;
+    let coordinates = new Int32Array(0), ownership = new Uint16Array(0), paletteNames: string[] | undefined;
     const paths = new Map<number, SVGPathElement>(), shapes = new Map<number, string>();
     let loaded: AtlasPlan | undefined, binds = 0;
 
@@ -59,6 +60,7 @@ export default function TerritoryCanvas(props: Props) {
         if (nextWidth !== sampleWidth || nextHeight !== sampleHeight) {
           sampleWidth = nextWidth; sampleHeight = nextHeight;
           coordinates = new Int32Array(sampleWidth * sampleHeight);
+          ownership = new Uint16Array(sampleWidth * sampleHeight);
           element.setAttribute('viewBox', `0 0 ${sampleWidth} ${sampleHeight}`);
           geometryKey = '';
         }
@@ -97,36 +99,23 @@ export default function TerritoryCanvas(props: Props) {
       if (paletteChanged) {paletteKey = nextPaletteKey; paletteNames = p.names;}
       if (lastYear !== year || paletteChanged) {
         const phase = (year - p.plan.start) / (p.plan.end - p.plan.start);
-        const owner = p.plan.owners, timing = p.plan.timing, runs = new Map<number, string[]>();
-        for (let y = 0; y < sampleHeight; y++) {
-          let previous = 0, start = 0;
-          for (let x = 0; x <= sampleWidth; x++) {
-            const cell = x === sampleWidth ? -1 : coordinates[y * sampleWidth + x];
-            let id = 0;
-            if (cell >= 0) {
-              const i = cell * 2, from = owner[i], to = owner[i + 1];
-              id = from === to || phase <= 0 || (phase < 1 && phase <= timing[i] / 65535) ? from : to;
-            }
-            if (id !== previous) {
-              if (previous) {
-                let segments = runs.get(previous);
-                if (!segments) {segments = []; runs.set(previous, segments);}
-                const length = x - start;
-                segments.push(`M${start} ${y}h${length}v1h-${length}z`);
-              }
-              previous = id; start = x;
-            }
-          }
+        const owner = p.plan.owners, timing = p.plan.timing;
+        for (let i = 0; i < ownership.length; i++) {
+          const cell = coordinates[i];
+          if (cell < 0) {ownership[i] = 0; continue;}
+          const offset = cell * 2, from = owner[offset], to = owner[offset + 1];
+          ownership[i] = from === to || phase <= 0 || (phase < 1 && phase <= timing[offset] / 65535) ? from : to;
         }
+        const contours = traceOwnershipContours(ownership, sampleWidth, sampleHeight);
         let changed = false;
         const query = p.query.trim().toLocaleLowerCase();
-        for (const [id, segments] of runs) {
-          const d = segments.join('');
+        for (const [id, d] of contours) {
           let path = paths.get(id);
           const fresh = !path;
           if (!path) {
             path = document.createElementNS(SVG_NS, 'path');
-            path.setAttribute('shape-rendering', 'crispEdges');
+            path.setAttribute('shape-rendering', 'geometricPrecision');
+            path.setAttribute('fill-rule', 'evenodd');
             element.appendChild(path); paths.set(id, path);
             changed = true;
           }
@@ -137,7 +126,7 @@ export default function TerritoryCanvas(props: Props) {
             path.setAttribute('fill-opacity', String(p.selected === name || (query && name.toLocaleLowerCase().includes(query)) ? 1 : query ? .12 : p.dark ? .88 : .82));
           }
         }
-        for (const [id, path] of paths) if (!runs.has(id)) {path.remove(); paths.delete(id); shapes.delete(id); changed = true;}
+        for (const [id, path] of paths) if (!contours.has(id)) {path.remove(); paths.delete(id); shapes.delete(id); changed = true;}
         element.dataset.year = year.toFixed(3);
         element.dataset.interval = `${p.plan.start}:${p.plan.end}`;
         if (changed) {
