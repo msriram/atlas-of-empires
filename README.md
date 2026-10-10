@@ -39,13 +39,13 @@ The basemap is [Natural Earth 1:110m land](https://github.com/nvkelso/natural-ea
 
 ### Continuous geographic ownership
 
-The live map uses a precomputed temporal atlas, replacing the old per-year polygon-clipping worker:
+The live map uses a precomputed temporal atlas, replacing the old per-year polygon-clipping worker. Its non-negotiable behavior and regression checks are in [Core requirements](docs/CORE_REQUIREMENTS.md):
 
 1. `scripts/build-atlas.ts` converts dated coordinates into a shared **0.25° longitude/latitude grid**. Smaller source regions take priority where polygons overlap. Holes and longitude wrapping are retained.
-2. `app/data/empire-timelines.json` gives each empire its own dated regional campaigns, pauses, gains, and losses. `scripts/lib/campaign-chronology.ts` applies these calendars to the relevant geographic portions of the source outlines. There is no shared world growth schedule. Unchanged geography stays fixed. **Missing annual evidence holds the last source border until the next dated map**; a source-map update is not presented as a dated conquest.
+2. `app/data/empire-timelines.json` gives each empire its own dated regional campaigns, pauses, gains, and losses. `scripts/lib/campaign-chronology.ts` applies these calendars to the relevant geographic portions of the source outlines. There is no shared world growth schedule. Unchanged geography stays fixed. Where annual evidence is missing, a connected local front estimates movement between dated source outlines; it is not presented as a documented conquest.
 3. `scripts/lib/ownership-field.ts` orders a campaign front through connected target geography from retained territory. Each location records previous/next ownership, arrival time, and a narrow sub-year smoothing band. Disconnected components may seed locally when the route is unknown. Polygons are never scaled into growing or shrinking circles. The geographic selectors and resistance are illustrative, not surveyed campaign fronts or measured terrain.
 4. `public/atlas/manifest.json` indexes content-addressed, compressed interval files. They encode any annual **or fractional-year** sample without storing thousands of redundant annual polygons.
-5. `app/temporal/territory-canvas.tsx` samples the field into bounded vector paths in flat or orthographic globe coordinates. Land has one displayed owner. Clicking and rendering use the same geographic ownership field. Shared endpoints are identical across intervals.
+5. `app/temporal/territory-canvas.tsx` samples the field into bounded vector paths in flat or orthographic globe coordinates. Colored territory is clipped to the same land geometry shown by the base map. Land has one displayed owner. Clicking and rendering use the same geographic ownership field. Shared endpoints are identical across intervals.
 
 Animated intermediate shapes are **estimates, not recovered historical annual coordinates**. The grid also limits very small states and extreme zoom detail. Add dated coordinate keyframes to improve the historical result; interpolation cannot supply missing evidence.
 
@@ -85,7 +85,7 @@ Negative years are BCE. `r` is an array of polygon rings; each point is `[longit
   "id": "example",
   "names": ["Example Kingdom"],
   "origin": [12, 41],
-  "fallback": "hold",
+  "fallback": "estimated",
   "source": "https://example.org/historical-source",
   "stages": [
     {"id": "northern-campaign", "action": "gain", "start": 120, "end": 125,
@@ -98,7 +98,7 @@ Negative years are BCE. `r` is an array of polygon rings; each point is `[longit
 
 `bounds` means `[west, south, east, north]`; `region` is a geographic selection polygon. Both are clipped to the dated source shapes. They select where a campaign applies, rather than defining a circle around a capital. Later, more specific stages take priority where selectors overlap. A stage whose dates partly overlap a source interval is constrained by that interval's endpoints. The current source geometry cannot reconstruct a conquest and reversal wholly missing from every source map; add coordinate keyframes for that case.
 
-The default fallback is `hold`. Use `estimated` on an **individual profile** only when an explicitly approximate transition is wanted despite missing annual evidence. There is no random growth or calendar-wide expansion curve. Existing profiles cover Rome's provinces and fragmentation, Achaemenid conquests, Alexander's campaigns/succession, Mongol campaigns/fragmentation, Yuan conquest of Song territory, Ottoman campaigns, and the Umayyad transition. Their source links support chronology; their intermediate outlines remain approximate.
+The default fallback is `estimated`. Changed cells move along a geographically ordered front during their source interval; unchanged cells never move. An individual profile can use `hold` only when a sourced one-year transfer at the next map date is justified. There is no random growth or calendar-wide expansion curve. Existing profiles cover Rome's provinces and fragmentation, Achaemenid conquests, Alexander's campaigns/succession, Mongol campaigns/fragmentation, Yuan conquest of Song territory, Ottoman campaigns, and the Umayyad transition. Their source links support chronology; their intermediate outlines remain approximate.
 
 The build derives Mongol anchors at 1206 and 1260 from the 1200 and 1279 source outlines. Later source maps supply successor regions. `app/data/territory-transfers.json` and the old polygon worker are retained as reference for the previous engine; the live chronology takes precedence. Keyframe dates are map evidence, not necessarily founding or ending dates.
 

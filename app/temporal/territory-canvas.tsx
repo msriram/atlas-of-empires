@@ -1,5 +1,5 @@
 'use client';
-import {useEffect, useRef, type RefObject} from 'react';
+import {useEffect, useId, useRef, type RefObject} from 'react';
 import type {AtlasPlan} from './atlas';
 import type {PlaybackClock} from './use-playback';
 import {displayName, colorKey} from './chronology';
@@ -21,15 +21,17 @@ type Props = {
   plan: AtlasPlan; names: string[]; clock: RefObject<PlaybackClock>;
   view: readonly number[]; rotation: [number, number]; zoom: number;
   mode: 'flat' | 'globe'; selected: string | null; query: string; dark: boolean;
+  flatLandPaths: readonly string[]; globeLandPaths: readonly string[]; repeats: readonly number[];
 };
 
 /** Vector ownership layer. A changing frontier updates only changed paths;
  * quiet years leave the DOM untouched. No animated raster surface is retained. */
 export default function TerritoryCanvas(props: Props) {
-  const svg = useRef<SVGSVGElement>(null), current = useRef(props);
+  const svg = useRef<SVGSVGElement>(null), contourGroup = useRef<SVGGElement>(null);
+  const current = useRef(props), clipId = `land-${useId().replaceAll(':', '')}`;
   useEffect(() => {current.current = props;});
   useEffect(() => {
-    const element = svg.current!;
+    const element = svg.current!, contoursElement = contourGroup.current!;
     let frame = 0, previousFrame = 0, measuredAt = 0, changedFrames = 0;
     let sampleWidth = 0, sampleHeight = 0, viewportWidth = 1, viewportHeight = 1, positionDirty = true, quality = false;
     let geometryKey = '', lastYear = NaN, paletteKey = '';
@@ -61,7 +63,6 @@ export default function TerritoryCanvas(props: Props) {
           sampleWidth = nextWidth; sampleHeight = nextHeight;
           coordinates = new Int32Array(sampleWidth * sampleHeight);
           ownership = new Uint16Array(sampleWidth * sampleHeight);
-          element.setAttribute('viewBox', `0 0 ${sampleWidth} ${sampleHeight}`);
           geometryKey = '';
         }
         positionDirty = false;
@@ -69,6 +70,10 @@ export default function TerritoryCanvas(props: Props) {
       const nextGeometryKey = `${sampleWidth}:${sampleHeight}:${p.plan.width}:${p.plan.height}:${p.view.join(',')}:${p.rotation.join(',')}:${p.zoom}:${p.mode}`;
       if (nextGeometryKey !== geometryKey) {
         const [vx, vy, vw, vh] = visibleSvgView(p.view, viewportWidth, viewportHeight);
+        // Render both land clip and territory contours in the base map's world
+        // coordinate system. Only the contours need sample-to-world scaling.
+        element.setAttribute('viewBox', `${vx} ${vy} ${vw} ${vh}`);
+        contoursElement.setAttribute('transform', `translate(${vx} ${vy}) scale(${vw / sampleWidth} ${vh / sampleHeight})`);
         const cos = Math.cos(p.rotation[1] * Math.PI / 180), sin = Math.sin(p.rotation[1] * Math.PI / 180);
         const radians = 180 / Math.PI, turn = p.rotation[0] * Math.PI / 180;
         for (let y = 0; y < sampleHeight; y++) {
@@ -116,7 +121,7 @@ export default function TerritoryCanvas(props: Props) {
             path = document.createElementNS(SVG_NS, 'path');
             path.setAttribute('shape-rendering', 'geometricPrecision');
             path.setAttribute('fill-rule', 'evenodd');
-            element.appendChild(path); paths.set(id, path);
+            contoursElement.appendChild(path); paths.set(id, path);
             changed = true;
           }
           if (shapes.get(id) !== d) {path.setAttribute('d', d); shapes.set(id, d); changed = true;}
@@ -142,5 +147,10 @@ export default function TerritoryCanvas(props: Props) {
     frame = requestAnimationFrame(draw);
     return () => {cancelAnimationFrame(frame); resize.disconnect(); paths.clear(); shapes.clear();};
   }, []);
-  return <svg ref={svg} className="territory-canvas" aria-hidden="true" preserveAspectRatio="none"/>;
+  return <svg ref={svg} className="territory-canvas" aria-hidden="true" preserveAspectRatio="none">
+    <defs><clipPath id={clipId} clipPathUnits="userSpaceOnUse">
+      {props.mode === 'flat' ? props.repeats.flatMap(copy => props.flatLandPaths.map((d, i) => <path key={`${copy}:${i}`} transform={`translate(${copy * 900} 0)`} d={d}/>)) : props.globeLandPaths.map((d, i) => <path key={i} d={d}/>)}
+    </clipPath></defs>
+    <g ref={contourGroup} clipPath={`url(#${clipId})`}/>
+  </svg>;
 }

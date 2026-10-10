@@ -1,6 +1,6 @@
 {
-  "defaultFallback": "hold",
-  "note": "Only dated stages animate by default. Missing annual evidence is held at the last source outline until the next dated map. Set an individual profile fallback to estimated to opt into unrecorded interpolation. Stages select geographic portions of source shapes; timing evidence does not make the estimated annual outlines surveyed fact.",
+  "defaultFallback": "estimated",
+  "note": "Dated stages control recorded regional changes. Otherwise, an estimated connected front interpolates between source outlines independently for each territory. Stable source cells stay still. These estimated annual outlines are illustrative, not surveyed borders; a profile can opt into hold when a transition should remain at a dated source map.",
   "families": [
     [
       "Roman Republic",
@@ -22,7 +22,7 @@
         12.5,
         41.9
       ],
-      "fallback": "hold",
+      "fallback": "estimated",
       "source": "https://www.worldhistory.org/timeline/Rome/",
       "stages": [
         {
@@ -308,7 +308,7 @@
         12.5,
         41.9
       ],
-      "fallback": "hold",
+      "fallback": "estimated",
       "source": "https://www.worldhistory.org/timeline/Rome/",
       "stages": [
         {
@@ -401,7 +401,7 @@
         29,
         41
       ],
-      "fallback": "hold",
+      "fallback": "estimated",
       "source": "https://www.worldhistory.org/timeline/Rome/",
       "stages": [
         {
@@ -465,7 +465,7 @@
         52,
         32
       ],
-      "fallback": "hold",
+      "fallback": "estimated",
       "source": "https://www.metmuseum.org/essays/the-achaemenid-persian-empire-550-330-b-c",
       "stages": [
         {
@@ -549,7 +549,7 @@
         22.5,
         40.5
       ],
-      "fallback": "hold",
+      "fallback": "estimated",
       "source": "https://web.ics.purdue.edu/~rauhn/Hist303/ALEX_chronology.htm",
       "stages": [
         {
@@ -697,7 +697,7 @@
         109,
         48
       ],
-      "fallback": "hold",
+      "fallback": "estimated",
       "source": "https://faculty.washington.edu/dwaugh/hist225/225chron/mongchr.html",
       "stages": [
         {
@@ -873,7 +873,7 @@
         116,
         40
       ],
-      "fallback": "hold",
+      "fallback": "estimated",
       "source": "https://faculty.washington.edu/dwaugh/hist225/225chron/mongchr.html",
       "stages": [
         {
@@ -901,7 +901,7 @@
         29,
         40
       ],
-      "fallback": "hold",
+      "fallback": "estimated",
       "source": "https://www.metmuseum.org/exhibitions/listings/2013/interwoven-globe",
       "stages": [
         {
@@ -999,7 +999,7 @@
         36,
         33
       ],
-      "fallback": "hold",
+      "fallback": "estimated",
       "source": "https://www.metmuseum.org/learn/educators/curriculum-resources/art-of-the-islamic-world/~/media/Files/Learn/For%20Educators/Publications%20for%20Educators/Islamic%20Teacher%20Resource/Introduction.pdf",
       "stages": [
         {

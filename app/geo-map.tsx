@@ -1,7 +1,7 @@
 'use client';
 import {useEffect,useMemo,useRef,useState,type RefObject} from 'react';
 import {Minus,Plus,LocateFixed} from 'lucide-react';
-import {geoOrthographic,geoPath} from 'd3-geo';
+import {geoContains,geoOrthographic,geoPath} from 'd3-geo';
 import {historicalEvents} from './data/events';
 import type {Point} from './territory-model';
 import {useAtlas} from './temporal/use-atlas';
@@ -40,6 +40,7 @@ export default function GeoMap({year,query,selectedName,onSelectName,onNamesChan
  const repeats=useMemo(()=>{const base=Math.round((center[0]-450)/900);return [base-1,base,base+1]},[center]);
  const projection=useMemo(()=>geoOrthographic().translate([450,225]).scale(205*zoom).rotate(rotation).clipAngle(90),[zoom,rotation]);
  const globePath=useMemo(()=>geoPath(projection),[projection]);
+ const globeLandPaths=useMemo(()=>landFeatures.map(f=>globePath(f.geometry as never)||''),[landFeatures,globePath]);
  function zoomAt(factor:number,sx=.5,sy=.5){const next=clamp(zoom*factor,1,mode==='globe'?5:12);if(mode==='flat'){const wx=view[0]+view[2]*sx,wy=view[1]+view[3]*sy;const nw=900/next,nh=450/next;setCenter([wx+(0.5-sx)*nw,clamp(wy+(0.5-sy)*nh,100,350)])}setZoom(next)}
  function onWheel(e:React.WheelEvent<SVGSVGElement>){e.preventDefault();const rect=svg.current?.getBoundingClientRect();if(!rect)return;zoomAt(e.deltaY<0?1.25:.8,clamp((e.clientX-rect.left)/rect.width,0,1),clamp((e.clientY-rect.top)/rect.height,0,1))}
  function pointerDown(e:React.PointerEvent<SVGSVGElement>){if(e.button!==0)return;drag.current={x:e.clientX,y:e.clientY,ox:center[0],oy:center[1],lon:rotation[0],lat:rotation[1]};moved.current=false;svg.current?.setPointerCapture(e.pointerId)}
@@ -51,7 +52,12 @@ export default function GeoMap({year,query,selectedName,onSelectName,onNamesChan
   const point=new DOMPoint(e.clientX,e.clientY).matrixTransform(matrix.inverse());
   if(mode==='globe'&&Math.hypot(point.x-450,point.y-225)>205*zoom)return;
   const coordinate=mode==='globe'?projection.invert?.([point.x,point.y]):[point.x/2.5-180,90-point.y/2.5];
-  if(coordinate){const id=ownerAt(data.plan,coordinate[0],coordinate[1],clock.current.year);onSelectName(displayName(data.manifest.names[id],clock.current.year)||null)}
+  if(coordinate){
+   const longitude=((coordinate[0]+180)%360+360)%360-180;
+   const onLand=landFeatures.some(f=>geoContains(f.geometry as never,[longitude,coordinate[1]]));
+   const id=onLand?ownerAt(data.plan,longitude,coordinate[1],clock.current.year):0;
+   onSelectName(displayName(data.manifest.names[id],clock.current.year)||null);
+  }
  }
  const canvasView=mode==='globe'?[0,0,900,450]:view;
  const reset=()=>{setZoom(1);setCenter([450,225]);setRotation([-10,-15])};
@@ -65,10 +71,10 @@ export default function GeoMap({year,query,selectedName,onSelectName,onNamesChan
     {repeats.map(copy=><g key={copy} transform={`translate(${copy*900} 0)`} className="land real-land">{land.map((d,i)=><path key={i} d={d}/>)}</g>)}
    </>:<>
     <path d={globePath({type:'Sphere'} as never)||''} className="globe-ocean"/>
-    <g className="land real-land">{landFeatures.map((f,i)=><path key={i} d={globePath(f.geometry as never)||''}/>)}</g>
+    <g className="land real-land">{globeLandPaths.map((d,i)=><path key={i} d={d}/>)}</g>
    </>}
   </svg>
-  {data&&<TerritoryCanvas plan={data.plan} names={data.manifest.names} clock={clock} view={canvasView} rotation={rotation} zoom={zoom} mode={mode} selected={selectedName} query={query} dark={dark}/>}
+  {data&&<TerritoryCanvas plan={data.plan} names={data.manifest.names} clock={clock} view={canvasView} rotation={rotation} zoom={zoom} mode={mode} selected={selectedName} query={query} dark={dark} flatLandPaths={land} globeLandPaths={globeLandPaths} repeats={repeats}/>}
   <svg className="map-event-overlay" viewBox={mode==='globe'?'0 0 900 450':view.join(' ')} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
    {mode==='flat'?repeats.map(copy=><g key={copy} transform={`translate(${copy*900} 0)`}>
     <g className="map-lines"><path d="M0 225H900 M450 0V450"/><path d="M0 112.5H900 M0 337.5H900"/></g>
@@ -81,8 +87,8 @@ export default function GeoMap({year,query,selectedName,onSelectName,onNamesChan
   </svg>
   </div>
   <div className="zoom-controls"><button aria-label="Zoom in" onClick={()=>zoomAt(1.5)}><Plus size={18}/></button><button aria-label="Zoom out" onClick={()=>zoomAt(1/1.5)}><Minus size={18}/></button><button aria-label="Reset map view" onClick={reset}><LocateFixed size={18}/></button></div>
-  <div className="boundary-source">Boundaries: {fmt(snapshot)} source map · dated campaigns; other borders held <span>·</span> Scroll to zoom · Drag to {mode==='globe'?'rotate':'pan'}</div>
+  <div className="boundary-source">Boundaries: {fmt(snapshot)} source map · dated campaigns and estimated local fronts <span>·</span> Scroll to zoom · Drag to {mode==='globe'?'rotate':'pan'}</div>
   {activeEvents[0]&&<aside className="event-detail"><span className="eyebrow">KEY EVENT · {fmt(year)}</span><h2>{activeEvents[0].title}</h2><p>{activeEvents[0].summary}</p><a href={activeEvents[0].source} target="_blank" rel="noreferrer">Historical source</a></aside>}
-  {selected&&<aside className="boundary-detail"><button aria-label="Close boundary details" onClick={()=>onSelectName(null)}>×</button><span className="eyebrow">{selectedTimeline?'DATED CAMPAIGNS':'SOURCE SNAPSHOT'} · {selectedTimeline?fmt(year):fmt(snapshot)}</span><h2>{selected.n}</h2><p>{customNames.has(selected.n)?'Estimated movement between this region’s authored coordinate keyframes. Identical frames keep the boundary still.':selectedTimeline?'Movement follows this empire’s dated regional campaigns. Borders hold between recorded changes. Campaign areas and the moving edge are approximate; the cited dates do not provide surveyed annual coordinates.':'No annual campaign geometry is recorded for this region. Its last dated outline is held until the next source map, without inventing gradual expansion or collapse.'}</p>{selectedTimeline&&<div className="region-events"><span className="eyebrow">INDEPENDENT TERRITORIAL TIMELINE</span>{selectedTimeline.stages.map(stage=><button key={stage.id} onClick={()=>onYearChange(stage.start)}><small>{fmt(stage.start)}–{fmt(stage.end)}</small>{stage.id.replaceAll('-',' ')} · {stage.action}</button>)}</div>}{history.length>0&&<div className="region-history"><span className="eyebrow">{customNames.has(selected.n)?'CUSTOM KEYFRAMES':'IN THE SOURCE MAPS'}</span><p>{customNames.has(selected.n)?'Defined':'Mapped'} in {history.length} dated {customNames.has(selected.n)?'keyframes':'snapshots'}, from {fmt(history[0])} to {fmt(history[history.length-1])}. These are map coverage dates, not founding or ending dates.</p><div>{[...new Set([history[0],history[Math.floor(history.length/2)],history[history.length-1]])].map(y=><button key={y} onClick={()=>onYearChange(y)}>{fmt(y)}</button>)}</div></div>}{historicalEvents.filter(e=>e.empire===selected.n).length>0&&<div className="region-events"><span className="eyebrow">RELATED EVENTS</span>{historicalEvents.filter(e=>e.empire===selected.n).map(e=><button key={e.id} onClick={()=>onYearChange(e.year)}><small>{fmt(e.year)}</small>{e.title}</button>)}</div>}{!customNames.has(selected.n)&&<a href={selectedTimeline?.source||'https://github.com/aourednik/historical-basemaps'} target="_blank" rel="noreferrer">View data source</a>}</aside>}
+  {selected&&<aside className="boundary-detail"><button aria-label="Close boundary details" onClick={()=>onSelectName(null)}>×</button><span className="eyebrow">{selectedTimeline?'DATED CAMPAIGNS + ESTIMATES':'SOURCE MAP + ESTIMATES'} · {selectedTimeline?fmt(year):fmt(snapshot)}</span><h2>{selected.n}</h2><p>{customNames.has(selected.n)?'Estimated movement between this region’s authored coordinate keyframes. Identical frames keep the boundary still.':selectedTimeline?'Dated regional campaigns control recorded changes. Other movement between source outlines follows an approximate local front; it is not a surveyed annual border.':'Annual movement between dated source outlines is an approximate local front, not a surveyed annual border.'}</p>{selectedTimeline&&<div className="region-events"><span className="eyebrow">INDEPENDENT TERRITORIAL TIMELINE</span>{selectedTimeline.stages.map(stage=><button key={stage.id} onClick={()=>onYearChange(stage.start)}><small>{fmt(stage.start)}–{fmt(stage.end)}</small>{stage.id.replaceAll('-',' ')} · {stage.action}</button>)}</div>}{history.length>0&&<div className="region-history"><span className="eyebrow">{customNames.has(selected.n)?'CUSTOM KEYFRAMES':'IN THE SOURCE MAPS'}</span><p>{customNames.has(selected.n)?'Defined':'Mapped'} in {history.length} dated {customNames.has(selected.n)?'keyframes':'snapshots'}, from {fmt(history[0])} to {fmt(history[history.length-1])}. These are map coverage dates, not founding or ending dates.</p><div>{[...new Set([history[0],history[Math.floor(history.length/2)],history[history.length-1]])].map(y=><button key={y} onClick={()=>onYearChange(y)}>{fmt(y)}</button>)}</div></div>}{historicalEvents.filter(e=>e.empire===selected.n).length>0&&<div className="region-events"><span className="eyebrow">RELATED EVENTS</span>{historicalEvents.filter(e=>e.empire===selected.n).map(e=><button key={e.id} onClick={()=>onYearChange(e.year)}><small>{fmt(e.year)}</small>{e.title}</button>)}</div>}{!customNames.has(selected.n)&&<a href={selectedTimeline?.source||'https://github.com/aourednik/historical-basemaps'} target="_blank" rel="noreferrer">View data source</a>}</aside>}
  </>
 }

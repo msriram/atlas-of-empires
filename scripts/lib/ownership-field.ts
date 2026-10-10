@@ -59,7 +59,9 @@ class MinHeap {
  * measurements. Disconnected components get a distance-delayed coastal seed. */
 export function buildField(before: Uint16Array, after: Uint16Array, width: number, height: number, start: number, end: number, names: string[], rules: Campaign[], chronology?: Chronology): AtlasPlan {
   const count = width * height, owners = new Uint16Array(count * 2), timing = new Uint16Array(count * 2);
-  const targets = new Map<number, number[]>(), distances = new Float32Array(count).fill(Infinity);
+  // Empty coverage is not a single empire. Keep each disappearing owner's
+  // retreat independent instead of marching one worldwide "unknown" front.
+  const targets = new Map<string, {target: number; cells: number[]}>(), distances = new Float32Array(count).fill(Infinity);
   const families = names.map((_, id) => chronology?.families.findIndex(f => f.includes(names[id])) ?? -1);
   const sameOwner = (a: number, b: number) => a === b || families[a] >= 0 && families[a] === families[b];
   const latScale = Float32Array.from({length: height}, (_, y) => Math.max(.08, Math.cos((90 - (y + .5) * 180 / height) * Math.PI / 180)));
@@ -69,7 +71,11 @@ export function buildField(before: Uint16Array, after: Uint16Array, width: numbe
   });
   for (let i = 0; i < count; i++) {
     owners[i * 2] = before[i]; owners[i * 2 + 1] = after[i];
-    if (before[i] !== after[i] && !sameOwner(before[i], after[i])) {const list = targets.get(after[i]) ?? []; list.push(i); targets.set(after[i], list);}
+    if (before[i] !== after[i] && !sameOwner(before[i], after[i])) {
+      const key = after[i] === 0 ? `empty:${before[i]}` : `owner:${after[i]}`;
+      const group = targets.get(key) ?? {target: after[i], cells: []};
+      group.cells.push(i); targets.set(key, group);
+    }
   }
   const neighbors = (i: number, visit: (j: number, cost: number) => void) => {
     const x = i % width, y = Math.floor(i / width);
@@ -79,7 +85,7 @@ export function buildField(before: Uint16Array, after: Uint16Array, width: numbe
       visit(j, Math.hypot(dx * latScale[y], dy) * (resistance[i] + resistance[j]) * .5);
     }
   };
-  for (const [target, cells] of targets) {
+  for (const {target, cells} of targets.values()) {
     const rule = rules.find(r => r.to === names[target] && !r.from && r.start >= start && r.end <= end);
     const heap = new MinHeap();
     // A disappearance into unknown coverage retreats from its edge, never from

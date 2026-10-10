@@ -2,6 +2,8 @@
 
 Contributions to historical coverage, source citations, map behavior, accessibility, and performance are welcome. Search GitHub Issues first, then open a bug report, historical data correction, or feature request. General feedback on what would make the atlas more useful belongs in Issues too.
 
+Read [Core requirements](docs/CORE_REQUIREMENTS.md) before any feature or data change. Check those requirements in the pull request, especially alignment in both map modes, independent territorial changes, and the 2 BCE → 1 BCE regression case.
+
 For a code or data change, fork the repository, create a focused branch, and open a pull request against `main`. Link the issue when there is one. A useful pull request explains what changed, why, how you checked it, and any uncertainty in the historical evidence. Screenshots before and after help with visible map changes.
 
 ## Run locally
@@ -29,7 +31,7 @@ npm run build
 
 Start with the [step-by-step data guide](docs/DATA_CONTRIBUTIONS.md). Edit `app/data/territory-keyframes.json`. Each frame has a year, `r` polygon rings in `[longitude, latitude]` degrees, and an optional precision level `p`. Negative years are BCE. Add at least two dated frames when describing growth. Put a source URL and uncertainty in your pull request. Use `hidden` for obsolete source labels. See [README.md](README.md) for an example. Rebuild with `npm run build:atlas`, reload, and include the generated `public/atlas/` changes in your pull request. Dev/build startup checks input hashes and skips generation when the atlas is current.
 
-The dated source maps live in `public/historical/`. Preserve their GPL license and attribution. For live campaigns, edit `app/data/empire-timelines.json` with the empire’s names, dated gains/losses, geographic selectors, and a source URL for every stage. Keep `fallback: "hold"` when annual evidence is missing. Opt into `estimated` only for a clearly approximate individual track. Do not add random timing offsets or force every year to show growth. Events go in `app/data/events.ts` and need a source URL. Avoid presenting estimated annual borders as surveyed fact.
+The dated source maps live in `public/historical/`. Preserve their GPL license and attribution. For live campaigns, edit `app/data/empire-timelines.json` with the empire’s names, dated gains/losses, geographic selectors, and a source URL for every stage. The default `estimated` fallback orders changed territory along a connected local front between source dates; unchanged geography stays still. Use `hold` only for a sourced, explicitly abrupt map-date transfer. Do not add random timing offsets or force every year to show growth. Events go in `app/data/events.ts` and need a source URL. Avoid presenting estimated annual borders as surveyed fact.
 
 ## Geometry checks
 
@@ -40,6 +42,7 @@ For performance changes, check 1y/32× playback in both modes and a reload using
 ## Pull request checklist
 
 - [ ] The change has a focused purpose and an issue link when relevant.
+- [ ] I read [Core requirements](docs/CORE_REQUIREMENTS.md) and checked the relevant map, timeline, and performance invariants.
 - [ ] Historical claims and coordinates include a source, date, and uncertainty.
 - [ ] Generated atlas files and the manifest were rebuilt when geographic inputs changed.
 - [ ] `npm test`, `npm run lint`, `npx tsc --noEmit`, and `npm run build` pass.
