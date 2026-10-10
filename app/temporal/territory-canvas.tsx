@@ -3,6 +3,7 @@ import {useEffect, useRef, type RefObject} from 'react';
 import type {AtlasPlan} from './atlas';
 import type {PlaybackClock} from './use-playback';
 import {displayName, colorKey} from './chronology';
+import {visibleSvgView} from './svg-viewport';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 function rgb(name: string) {
@@ -29,7 +30,7 @@ export default function TerritoryCanvas(props: Props) {
   useEffect(() => {
     const element = svg.current!;
     let frame = 0, previousFrame = 0, measuredAt = 0, changedFrames = 0;
-    let sampleWidth = 0, sampleHeight = 0, positionDirty = true, quality = false;
+    let sampleWidth = 0, sampleHeight = 0, viewportWidth = 1, viewportHeight = 1, positionDirty = true, quality = false;
     let geometryKey = '', lastYear = NaN, paletteKey = '';
     let coordinates = new Int32Array(0), paletteNames: string[] | undefined;
     const paths = new Map<number, SVGPathElement>(), shapes = new Map<number, string>();
@@ -37,11 +38,11 @@ export default function TerritoryCanvas(props: Props) {
 
     const positionLayer = () => {
       const parent = element.parentElement!.getBoundingClientRect();
-      const width = Math.min(parent.width, parent.height * 2), height = width / 2;
-      element.style.width = `${width}px`; element.style.height = `${height}px`;
-      element.style.left = `${(parent.width - width) / 2}px`;
-      element.style.top = `${(parent.height - height) / 2}px`;
-      positionDirty = true;
+      viewportWidth = Math.max(1, parent.width);
+      viewportHeight = Math.max(1, parent.height);
+      element.style.width = `${viewportWidth}px`; element.style.height = `${viewportHeight}px`;
+      element.style.left = '0'; element.style.top = '0';
+      positionDirty = true; geometryKey = '';
     };
     const resize = new ResizeObserver(positionLayer);
     resize.observe(element.parentElement!); positionLayer();
@@ -52,9 +53,9 @@ export default function TerritoryCanvas(props: Props) {
       previousFrame = now;
       if (quality !== playing) {quality = playing; positionDirty = true;}
       if (positionDirty) {
-        const rect = element.getBoundingClientRect();
-        const nextWidth = Math.max(1, Math.min(Math.round(rect.width), playing ? 520 : 1000));
-        const nextHeight = Math.max(1, Math.round(nextWidth / 2));
+        const scale = Math.min(1, (playing ? 520 : 1000) / viewportWidth, (playing ? 260 : 500) / viewportHeight);
+        const nextWidth = Math.max(1, Math.round(viewportWidth * scale));
+        const nextHeight = Math.max(1, Math.round(viewportHeight * scale));
         if (nextWidth !== sampleWidth || nextHeight !== sampleHeight) {
           sampleWidth = nextWidth; sampleHeight = nextHeight;
           coordinates = new Int32Array(sampleWidth * sampleHeight);
@@ -65,7 +66,7 @@ export default function TerritoryCanvas(props: Props) {
       }
       const nextGeometryKey = `${sampleWidth}:${sampleHeight}:${p.plan.width}:${p.plan.height}:${p.view.join(',')}:${p.rotation.join(',')}:${p.zoom}:${p.mode}`;
       if (nextGeometryKey !== geometryKey) {
-        const [vx, vy, vw, vh] = p.view;
+        const [vx, vy, vw, vh] = visibleSvgView(p.view, viewportWidth, viewportHeight);
         const cos = Math.cos(p.rotation[1] * Math.PI / 180), sin = Math.sin(p.rotation[1] * Math.PI / 180);
         const radians = 180 / Math.PI, turn = p.rotation[0] * Math.PI / 180;
         for (let y = 0; y < sampleHeight; y++) {
