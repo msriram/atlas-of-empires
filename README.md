@@ -74,7 +74,7 @@ Edit `app/data/territory-keyframes.json`. Add a track with two or more dated lon
 }
 ```
 
-Negative years are BCE. `r` is an array of polygon rings; each point is `[longitude, latitude]` in degrees. A track overrides a source region with the same name for the track's date range; it can also add an entirely new region. To remove a source region, add its exact name to `hidden`. To remove a custom region, delete its track. Authored coordinate tracks explicitly opt into estimated interpolation between their frames. Identical frames remain static. Run `npm run build:atlas` after changing geographic data, then reload the page. `npm run dev` and `npm run build` also check for changed inputs and regenerate only when needed. Source edits do not trigger a full atlas rebuild on every browser reload. Commit the updated atlas manifest and generated interval files with the source data.
+Negative years are BCE. `r` is an array of polygon rings; each point is `[longitude, latitude]` in degrees. A track overrides a source region with the same name for the track's date range; it can also add an entirely new region. To remove a source region, add its exact name to `hidden`. To remove a custom region, delete its track. Authored coordinate tracks explicitly opt into estimated interpolation between their frames. Identical frames remain static. Run `npm run build:atlas` after changing geographic data and include the updated atlas manifest and interval files in the pull request. Merging to `main` triggers the GitHub Pages rebuild and publishes the new data.
 
 ### Independent campaign data
 
