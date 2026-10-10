@@ -1,3 +1,5 @@
+import {periodAt,periodNamed} from '../data/historical-names';
+
 export type CampaignStage = {
   id: string; action: 'gain' | 'loss'; start: number; end: number;
   bounds?: number[]; region?: number[][]; source: string; geometry?: string;
@@ -15,10 +17,14 @@ export function canonicalName(name: string, year: number) {
   return name;
 }
 export function displayName(name: string, year: number) {
+  const period=periodAt(name,year);
+  if(period)return period.name;
   if (name === 'Roman Republic' || name === 'Roman Empire') return year < -27 ? 'Roman Republic' : 'Roman Empire';
   return name;
 }
 export function colorKey(name: string) {
+  const period=periodNamed(name);
+  if(period)return period.sourceName;
   if (name === 'Roman Republic' || name === 'Roman Empire') return 'Roman Empire';
   if (name === 'Eastern Roman Empire' || name === 'Byzantine Empire') return 'Eastern Roman Empire';
   return name;

@@ -15,6 +15,7 @@ Read this document before changing map rendering, historical data, playback, or 
 - An area being transferred has exactly one owner at each instant. Conquest and succession must move a boundary through the area rather than erase one entire empire and create another in one frame. A documented abrupt one-year event may use a one-year window, but that must be an explicit, sourced data choice.
 - Empty or unknown coverage is not one worldwide polity. Retreats into unknown coverage must be independent for each previous owner.
 - Do not claim estimated annual coordinates are surveyed facts. Improve a region by adding sourced dated stages or coordinate keyframes. Exact source geometry and annual estimates must be distinguishable to users.
+- Historical period names and spelling variants must be searchable across the timeline. A new name for an existing region must preserve its territorial identity and color; it must not create, erase, or reshape the polygon at the naming date. Where a source outline is too coarse to show the extent of a named period, explain that limitation in the region detail.
 
 ## Interaction and performance
 

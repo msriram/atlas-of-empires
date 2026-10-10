@@ -3,6 +3,7 @@ import {useEffect, useId, useRef, type RefObject} from 'react';
 import type {AtlasPlan} from './atlas';
 import type {PlaybackClock} from './use-playback';
 import {displayName, colorKey} from './chronology';
+import {searchTerms} from '../data/historical-names';
 import {visibleSvgView} from './svg-viewport';
 import {traceOwnershipContours} from './contours';
 
@@ -99,7 +100,7 @@ export default function TerritoryCanvas(props: Props) {
       }
       if (loaded !== p.plan) {loaded = p.plan; binds++; element.dataset.uploads = String(binds); lastYear = NaN;}
       const year = Math.max(p.plan.start, Math.min(p.plan.end, p.clock.current.year));
-      const nextPaletteKey = `${p.selected}:${p.query}:${p.dark}:${p.clock.current.year < -27}`;
+      const nextPaletteKey = `${p.selected}:${p.query}:${p.dark}:${displayName('Egypt',year)}:${displayName('Songhai',year)}:${year < -27}`;
       const paletteChanged = nextPaletteKey !== paletteKey || paletteNames !== p.names;
       if (paletteChanged) {paletteKey = nextPaletteKey; paletteNames = p.names;}
       if (lastYear !== year || paletteChanged) {
@@ -128,7 +129,7 @@ export default function TerritoryCanvas(props: Props) {
           if (fresh || paletteChanged) {
             const name = displayName(p.names[id], year);
             path.setAttribute('fill', rgb(name));
-            path.setAttribute('fill-opacity', String(p.selected === name || (query && name.toLocaleLowerCase().includes(query)) ? 1 : query ? .12 : p.dark ? .88 : .82));
+            path.setAttribute('fill-opacity', String(p.selected === name || (query && searchTerms(name).some(term=>term.toLocaleLowerCase().includes(query))) ? 1 : query ? .12 : p.dark ? .88 : .82));
           }
         }
         for (const [id, path] of paths) if (!contours.has(id)) {path.remove(); paths.delete(id); shapes.delete(id); changed = true;}

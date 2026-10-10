@@ -37,6 +37,12 @@ See the [project limitations](#historical-boundaries) before interpreting an ani
 
 The basemap is [Natural Earth 1:110m land](https://github.com/nvkelso/natural-earth-vector), public domain. Dated political and cultural polygons in `public/historical/` are simplified derivatives of [André Ourednik's historical-basemaps](https://github.com/aourednik/historical-basemaps), GPL-3.0; see `public/historical/LICENSE`. These maps have uncertain borders, inconsistent coverage, and some historical naming errors. The newest source snapshot is 2010; later years reuse it.
 
+### Egyptian periods and African history
+
+The atlas labels Egypt's **Old Kingdom** (c. 2686–2181 BCE), **Middle Kingdom** (c. 2055–1650 BCE), and **New Kingdom** (c. 1550–1069 BCE) using the [Egyptian Ministry of Tourism and Antiquities chronology](https://egymonuments.gov.eg/historical-periods/). Search for any of those period names to jump to a representative year. The underlying Egypt shape comes from the dated source maps; the name change does not redraw it. The source outlines are too coarse to distinguish the kingdoms' full changing extents, especially New Kingdom expansion into Nubia and the Levant.
+
+The source maps also include Songhai, Mali, ancient Ghana, Kush, Axum, Kanem-Bornu, Benin, Great Zimbabwe, Oyo, Dahomey, Asante, Sokoto, and other African states at their respective dates. Search accepts variants such as **Sunghai / Songhay → Songhai Empire**, **Aksum → Axum**, **Ashanti → Asante**, and **Kongo → Congo**. Songhai is labeled an empire from 1464 to 1590, based on the [Metropolitan Museum of Art's chronology](https://www.metmuseum.org/ru/toah/ht/07/afu.html). The later source maps still use “Songhai” after the 1591 collapse, a known source limitation; the atlas does not treat those later outlines as a surveyed continuation of the empire. Search names and period dates live in `app/data/historical-names.ts`.
+
 ### Continuous geographic ownership
 
 The live map uses a precomputed temporal atlas, replacing the old per-year polygon-clipping worker. Its non-negotiable behavior and regression checks are in [Core requirements](docs/CORE_REQUIREMENTS.md):
